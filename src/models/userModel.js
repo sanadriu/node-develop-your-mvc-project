@@ -7,11 +7,13 @@ const UserSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
+      trim: true,
       maxlength: [64, "Email length must not be longer than 64 characters"],
       validate: {
         validator: function (value) {
@@ -24,18 +26,22 @@ const UserSchema = new Schema(
     },
     name: {
       type: String,
+      trim: true,
       maxlength: [32, "Name length must not be longer than 32 characters"],
     },
     surname: {
       type: String,
+      trim: true,
       maxlength: [32, "Surname length must not be longer than 32 characters"],
     },
     phoneLocale: {
       type: String,
+      trim: true,
       enum: ["es-ES", "fr-FR", "en-GB", "it-IT", "de-DE"],
     },
     phoneNumber: {
       type: Number,
+      trim: true,
       validate: {
         validator: function (value) {
           return this.phoneLocale
@@ -47,26 +53,30 @@ const UserSchema = new Schema(
         },
       },
     },
-    billingAddresses: [
+    addresses: [
       {
         address: {
           type: String,
           required: true,
+          trim: true,
           maxlength: 64,
         },
         city: {
           type: String,
           required: true,
+          trim: true,
           maxlength: 48,
         },
         countryCode: {
           type: String,
           required: true,
+          trim: true,
           enum: ["ES", "FR", "GB", "DE", "IT"],
         },
         postalCode: {
           type: String,
           required: true,
+          trim: true,
           validate: {
             validator: function (value) {
               return validator.isPostalCode(value, this.countryCode);

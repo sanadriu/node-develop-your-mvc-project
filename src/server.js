@@ -1,4 +1,5 @@
 const express = require("express");
+const { error } = require("./middlewares");
 const { json } = require("body-parser");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -18,5 +19,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", UserRouter);
+app.use(error);
 
 module.exports = app;
