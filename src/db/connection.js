@@ -7,7 +7,7 @@ function connection() {
     useUnifiedTopology: true,
     useCreateIndex: true,
     useFindAndModify: false,
-  });
+  },console.log("DB conected"));
 }
 
 module.exports = connection;
