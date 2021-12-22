@@ -13,6 +13,7 @@ const {
     addUserAddress,
     updateUserAddress,
     deleteUserAddress,
+    deleteUserAddresses,
   },
 } = require("../controllers");
 
@@ -25,11 +26,12 @@ UserRouter.put("/:id", updateUser, notFound);
 UserRouter.delete("/:id", deleteUser, notFound);
 UserRouter.delete("/", deleteUsers);
 
-UserRouter.get("/:id/addresses", getUserAddresses);
-UserRouter.get("/:id/addresses/:index", getUserAddress);
-UserRouter.post("/:id/addresses/", addUserAddress);
-UserRouter.put("/:id/addresses/:index", updateUserAddress);
-UserRouter.delete("/:id/addresses/:index", deleteUserAddress);
+UserRouter.get("/:idUser/addresses", getUserAddresses);
+UserRouter.get("/:idUser/addresses/:idAddress", getUserAddress);
+UserRouter.post("/:idUser/addresses/", addUserAddress);
+UserRouter.put("/:idUser/addresses/:idAddress", updateUserAddress);
+UserRouter.delete("/:idUser/addresses/:idAddress", deleteUserAddress);
+UserRouter.delete("/:id/addresses/", deleteUserAddresses);
 
 UserRouter.use("/:id/addresses", notFound);
 UserRouter.use("/", notFound);

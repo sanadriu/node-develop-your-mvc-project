@@ -21,7 +21,7 @@ async function getUser(req, res, next) {
 
   try {
     const result = await UserModel.findOne({ _id: id })
-      .select("-_id -__v -createdAt -updatedAt")
+      .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -60,7 +60,7 @@ async function updateUser(req, res, next) {
       new: true,
       runValidators: true,
     })
-      .select("-_id -__v -createdAt -updatedAt")
+      .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -80,7 +80,7 @@ async function deleteUser(req, res, next) {
 
   try {
     const result = await UserModel.findOneAndDelete({ _id: id })
-      .select("-_id -__v -createdAt -updatedAt")
+      .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -111,17 +111,17 @@ async function deleteUsers(req, res, next) {
 }
 
 async function getUserAddresses(req, res, next) {
-  const { id } = req.params;
+  const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findOne({ _id: id })
-      .select(`addresses`)
+    const result = await UserModel.findOne({ _id: idUser })
+      .select(`-_id addresses`)
       .lean()
       .exec();
 
-    const { addresses } = result;
+    if (!result) return next();
 
-    if (!addresses) return next();
+    const { addresses } = result;
 
     res.status(200).send({
       success: true,
@@ -133,15 +133,19 @@ async function getUserAddresses(req, res, next) {
 }
 
 async function getUserAddress(req, res, next) {
-  const { id, index } = req.params;
+  const { idUser, idAddress } = req.params;
 
   try {
-    const result = await UserModel.findOne({ _id: id })
-      .select("addresses")
+    const result = await UserModel.findOne({ _id: idUser })
+      .select("-_id addresses")
       .lean()
       .exec();
 
-    const address = result.addresses[Number(index) - 1];
+    if (!result) return next();
+
+    const address = result.addresses.find(
+      (address) => address._id == idAddress,
+    );
 
     if (!address) return next();
 
@@ -155,19 +159,23 @@ async function getUserAddress(req, res, next) {
 }
 
 async function addUserAddress(req, res, next) {
-  const { id } = req.params;
+  const { idUser } = req.params;
   const address = req.body;
 
   try {
     const result = await UserModel.findOneAndUpdate(
-      { _id: id },
+      { _id: idUser },
       {
         $push: {
           addresses: address,
         },
       },
+      {
+        new: true,
+        runValidators: true,
+      },
     )
-      .select("addresses")
+      .select("-_id addresses")
       .lean()
       .exec();
 
@@ -181,20 +189,23 @@ async function addUserAddress(req, res, next) {
 }
 
 async function updateUserAddress(req, res, next) {
-  const { id, index } = req.params;
+  const { idUser, idAddress } = req.params;
   const address = req.body;
 
   try {
     const result = await UserModel.findOneAndUpdate(
-      { _id: id },
+      { _id: idUser, "addresses._id": idAddress },
       {
         $set: {
-          "addresses.$[index]": address,
+          "addresses.$": address,
         },
       },
-      { arrayFilters: { index: Number(index) - 1 } },
+      {
+        new: true,
+        runValidators: true,
+      },
     )
-      .select("addresses")
+      .select("-_id addresses")
       .lean()
       .exec();
 
@@ -210,29 +221,60 @@ async function updateUserAddress(req, res, next) {
 }
 
 async function deleteUserAddress(req, res, next) {
-  const { id, index } = req.params;
+  const { idUser, idAddress } = req.params;
 
   try {
     const result = await UserModel.findOneAndUpdate(
-      { _id: id },
+      { _id: idUser },
       {
-        $unset: {
-          "addresses.$[index]": "",
+        $pull: {
+          addresses: { _id: idAddress },
         },
       },
-      { arrayFilters: { index: Number(index) - 1 } },
+      {
+        new: true,
+        runValidators: true,
+      },
     )
-      .select("addresses")
+      .select("-_id addresses")
       .lean()
       .exec();
-
-    console.log(result.addresses);
 
     if (!result) return next();
 
     res.status(200).send({
       success: true,
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteUserAddresses(req, res, next) {
+  const { id } = req.params;
+
+  try {
+    const result = await UserModel.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          addresses: [],
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .select("-_id addresses")
+      .lean()
+      .exec();
+
+    if (!result) return next();
+
+    res.status(200).send({
+      success: true,
     });
   } catch (error) {
     next(error);
@@ -251,4 +293,5 @@ module.exports = {
   addUserAddress,
   updateUserAddress,
   deleteUserAddress,
+  deleteUserAddresses,
 };
