@@ -3,6 +3,8 @@ const { json } = require("body-parser");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
+const UserRouter = require("./routes/userRouter");
+
 const app = express();
 
 app.use(json());
@@ -14,5 +16,7 @@ app.get("/", (req, res) => {
     data: "hello-mundo",
   });
 });
+
+app.use("/users", UserRouter);
 
 module.exports = app;
