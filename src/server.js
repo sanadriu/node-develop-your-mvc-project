@@ -25,7 +25,7 @@ app.use(error);
 
 //--------------------------- products CRUD--------------------------------------------------
 const productsRouter = require("./routes/products-routes");
-app.use("/users",productsRouter);
+app.use("/products",productsRouter);
 
 
 module.exports = app;
