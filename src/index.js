@@ -1,5 +1,16 @@
 const app = require("./server");
+const connection = require("./db/connection");
+const {
+  logger,
+  app: { PORT },
+} = require("./config/config");
 
-app.listen(4000, () => {
-  console.log(`Server listening on http:localhost:4000`);
-});
+connection()
+  .then(() => {
+    app.listen(4000, () => {
+      logger.info(`Server listening on localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    logger.warn(`Database connection failed: ${error.message}`);
+  });
