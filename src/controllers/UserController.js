@@ -56,10 +56,16 @@ async function updateUser(req, res, next) {
   const user = req.body;
 
   try {
-    const result = await UserModel.findOneAndUpdate({ _id: id }, user, {
-      new: true,
-      runValidators: true,
-    })
+    const result = await UserModel.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: user,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
       .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
