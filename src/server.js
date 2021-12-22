@@ -11,8 +11,9 @@ app.use(helmet());
 
 
 //--------------------------- products CRUD--------------------------------------------------
-const productsRouter = require("./routes/products-routes")
-app.use(productsRouter)
+const productsRouter = require("./routes/products-routes");
+app.use(productsRouter);
+
 //------------------------------------------------------------------------------------------
 
 
