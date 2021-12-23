@@ -4,7 +4,7 @@ const { json } = require("body-parser");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
-const UserRouter = require("./routes/userRouter");
+
 
 const app = express();
 
@@ -18,14 +18,11 @@ app.get("/", (req, res) => {
   });
 });
 
-//--------------------------- users CRUD--------------------------------------------------
-
-app.use("/users", UserRouter);
-app.use(error);
 
 //--------------------------- products CRUD--------------------------------------------------
 const productsRouter = require("./routes/products-routes");
 app.use("/products",productsRouter);
+app.use(error);
 
 
 module.exports = app;
