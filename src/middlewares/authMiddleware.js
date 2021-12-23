@@ -1,4 +1,4 @@
-const { auth } = require("../firebase/firebase");
+const { auth } = require("../services/firebase");
 
 async function authMiddleware(req, res, next) {
   try {

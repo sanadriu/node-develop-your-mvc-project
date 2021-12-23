@@ -115,6 +115,61 @@ async function deleteUsers(req, res, next) {
   }
 }
 
+async function getDetails(req, res, next) {
+  const { idUser } = req.params;
+
+  try {
+    const result = await UserModel.findOne({ _id: idUser })
+      .select("-_id name surname phoneNumber phoneLocale")
+      .lean()
+      .exec();
+
+    if (!result) return next();
+
+    res.status(200).send({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateDetails(req, res, next) {
+  const { idUser } = req.params;
+  const { name, surname, phoneNumber, phoneLocale } = req.body;
+
+  try {
+    const result = await UserModel.findOneAndUpdate(
+      { _id: idUser },
+      {
+        $set: {
+          name,
+          surname,
+          phoneNumber,
+          phoneLocale,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .select("-__v -createdAt -updatedAt")
+      .lean()
+      .exec();
+
+    if (!result) return next();
+
+    res.status(200).send({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function getAddresses(req, res, next) {
   const { idUser } = req.params;
 
@@ -249,7 +304,6 @@ async function deleteSingleAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result,
     });
   } catch (error) {
     next(error);
@@ -286,6 +340,21 @@ async function deleteAddresses(req, res, next) {
   }
 }
 
+async function signUp(req, res, next) {
+  const user = req.body;
+
+  try {
+    const result = await UserModel.create({ ...user, role: customer });
+
+    res.status(201).send({
+      success: true,
+      data: result._id,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getUsers,
   getSingleUser,
@@ -293,10 +362,13 @@ module.exports = {
   updateUser,
   deleteSingleUser,
   deleteUsers,
+  getDetails,
+  updateDetails,
   getAddresses,
   getSingleAddress,
   addAddress,
   updateAddress,
   deleteSingleAddress,
   deleteAddresses,
+  signUp,
 };

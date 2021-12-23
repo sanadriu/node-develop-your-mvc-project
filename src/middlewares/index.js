@@ -1,4 +1,4 @@
-const notFound = require("./not-found");
+const notFound = require("./notFound");
 const error = require("./error");
 const authMiddleware = require("./authMiddleware");
 const userMiddleware = require("./userMiddleware");

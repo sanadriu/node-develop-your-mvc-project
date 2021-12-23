@@ -50,6 +50,14 @@ UserRouter.post(
   UserController.createUser,
 );
 
+UserRouter.post(
+  "/",
+  authMiddleware,
+  userMiddleware,
+  filterMiddleware(allowFullAdmins),
+  UserController.createUser,
+);
+
 UserRouter.put(
   "/:idUser",
   authMiddleware,
@@ -57,6 +65,14 @@ UserRouter.put(
   filterMiddleware(allowFullAdmins),
   UserController.updateUser,
   notFound,
+);
+
+UserRouter.delete(
+  "/",
+  authMiddleware,
+  userMiddleware,
+  filterMiddleware(allowFullAdmins),
+  UserController.deleteUsers,
 );
 
 UserRouter.delete(
@@ -68,12 +84,22 @@ UserRouter.delete(
   notFound,
 );
 
-UserRouter.delete(
-  "/",
+UserRouter.get(
+  "/:idUser/details",
   authMiddleware,
   userMiddleware,
-  filterMiddleware(allowFullAdmins),
-  UserController.deleteUsers,
+  filterMiddleware(allowUsers),
+  UserController.getDetails,
+  notFound,
+);
+
+UserRouter.put(
+  "/:idUser/details",
+  authMiddleware,
+  userMiddleware,
+  filterMiddleware(allowUsers),
+  UserController.updateDetails,
+  notFound,
 );
 
 UserRouter.get(
@@ -109,19 +135,19 @@ UserRouter.put(
 );
 
 UserRouter.delete(
-  "/:idUser/addresses/:idAddress",
-  authMiddleware,
-  userMiddleware,
-  filterMiddleware(allowUsers),
-  UserController.deleteSingleAddress,
-);
-
-UserRouter.delete(
   "/:id/addresses/",
   authMiddleware,
   userMiddleware,
   filterMiddleware(allowUsers),
   UserController.deleteAddresses,
+);
+
+UserRouter.delete(
+  "/:idUser/addresses/:idAddress",
+  authMiddleware,
+  userMiddleware,
+  filterMiddleware(allowUsers),
+  UserController.deleteSingleAddress,
 );
 
 UserRouter.use("/:id/addresses", notFound);
