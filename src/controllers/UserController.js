@@ -81,7 +81,7 @@ async function updateUser(req, res, next) {
   }
 }
 
-async function deleteUser(req, res, next) {
+async function deleteSingleUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
@@ -225,7 +225,7 @@ async function updateAddress(req, res, next) {
   }
 }
 
-async function deleteAddress(req, res, next) {
+async function deleteSingleAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
@@ -291,12 +291,12 @@ module.exports = {
   getSingleUser,
   createUser,
   updateUser,
-  deleteUser,
+  deleteSingleUser,
   deleteUsers,
   getAddresses,
   getSingleAddress,
   addAddress,
   updateAddress,
-  deleteAddress,
+  deleteSingleAddress,
   deleteAddresses,
 };
