@@ -10,10 +10,10 @@ logger.enableAll();
 const CONFIG = {
   production: {
     app: {
-      PORT: process.env.PORT || 4000,
+      port: process.env.PORT || 4000,
     },
     client: {
-      URL: process.env.CLIENT_URL || "http://localhost:3000",
+      url: process.env.CLIENT_URL || "http://localhost:3000",
     },
     logger: {
       warn: logger.warn,
@@ -43,10 +43,10 @@ const CONFIG = {
   },
   development: {
     app: {
-      PORT: process.env.PORT || 4000,
+      port: process.env.PORT || 4000,
     },
     client: {
-      URL: process.env.CLIENT_URL || "http://localhost:3000",
+      url: process.env.CLIENT_URL || "http://localhost:3000",
     },
     logger: {
       warn: logger.warn,

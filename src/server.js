@@ -1,16 +1,24 @@
-const express = require("express");
-const { error } = require("./middlewares");
-const { json } = require("body-parser");
-const helmet = require("helmet");
-const morgan = require("morgan");
+const config = require("./config/config");
 
-const UserRouter = require("./routes/userRouter");
+const express = require("express");
+const helmet = require("helmet");
+const json = require("body-parser").json;
+const morgan = require("morgan");
+const cors = require("cors");
+
+const { error } = require("./middlewares");
+const { UserRouter } = require("./routes");
 
 const app = express();
 
-app.use(json());
 app.use(morgan("dev"));
 app.use(helmet());
+app.use(json());
+app.use(
+  cors({
+    origin: config.client.URL,
+  }),
+);
 
 app.get("/", (req, res) => {
   res.status(200).send({
