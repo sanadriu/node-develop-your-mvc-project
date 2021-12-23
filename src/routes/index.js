@@ -1,5 +1,7 @@
-const userRouter = require("./userRouter");
+const UserRouter = require("./UserRouter");
+const ProductRouter = require("./ProductRouter");
 
 module.exports = {
-  userRouter,
+  UserRouter,
+  ProductRouter,
 };
