@@ -9,14 +9,12 @@ const ProductSchema = Schema({
   price: {
     type: Number,
     required: true,
-    min: 10,
-    max: 200,
+    min: 0,
   },
   stock: {
     type: Number,
     required: true,
     min: 0,
-    max: 50,
   },
   description: {
     type: String,

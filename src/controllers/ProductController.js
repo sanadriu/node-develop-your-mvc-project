@@ -20,7 +20,7 @@ async function getSingleProduct(req, res, next) {
   const { productId } = req.params;
 
   try {
-    const result = await ProductModel.find({ _id: productId })
+    const result = await ProductModel.findOne({ _id: productId })
       .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
