@@ -7,7 +7,7 @@ async function getUsers(req, res, next) {
       .lean()
       .exec();
 
-    res.status(201).send({
+    res.status(200).send({
       success: true,
       data: result,
     });
@@ -17,17 +17,17 @@ async function getUsers(req, res, next) {
 }
 
 async function getUser(req, res, next) {
-  const { id } = req.params;
+  const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findOne({ _id: id })
+    const result = await UserModel.findOne({ _id: idUser })
       .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
 
     if (!result) return next();
 
-    res.status(201).send({
+    res.status(200).send({
       success: true,
       data: result,
     });
@@ -52,12 +52,12 @@ async function createUser(req, res, next) {
 }
 
 async function updateUser(req, res, next) {
-  const { id } = req.params;
+  const { idUser } = req.params;
   const user = req.body;
 
   try {
     const result = await UserModel.findOneAndUpdate(
-      { _id: id },
+      { _id: idUser },
       {
         $set: user,
       },
@@ -82,10 +82,10 @@ async function updateUser(req, res, next) {
 }
 
 async function deleteUser(req, res, next) {
-  const { id } = req.params;
+  const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findOneAndDelete({ _id: id })
+    const result = await UserModel.findOneAndDelete({ _id: idUser })
       .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
@@ -94,7 +94,6 @@ async function deleteUser(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result,
     });
   } catch (error) {
     next(error);
@@ -185,7 +184,7 @@ async function addUserAddress(req, res, next) {
       .lean()
       .exec();
 
-    res.status(200).send({
+    res.status(201).send({
       success: true,
       data: result,
     });

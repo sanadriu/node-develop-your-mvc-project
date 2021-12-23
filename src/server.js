@@ -6,8 +6,12 @@ const json = require("body-parser").json;
 const morgan = require("morgan");
 const cors = require("cors");
 
+<<<<<<< HEAD
 const { error } = require("./middlewares");
 const { UserRouter } = require("./routes");
+=======
+const { UserRouter, ProductRouter } = require("./routes");
+>>>>>>> main
 
 const app = express();
 
@@ -26,7 +30,9 @@ app.get("/", (req, res) => {
   });
 });
 
+app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
+
 app.use(error);
 
 module.exports = app;
