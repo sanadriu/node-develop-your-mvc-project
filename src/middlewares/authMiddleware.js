@@ -1,4 +1,3 @@
-const { logger } = require("../config/config");
 const { auth } = require("../firebase/firebase");
 
 async function authMiddleware(req, res, next) {
@@ -20,8 +19,8 @@ async function authMiddleware(req, res, next) {
       next();
     } else {
       res.status(401).send({
-        data: [],
-        error: "Unauthorized",
+        success: false,
+        message: "Not authorized",
       });
     }
   } catch (error) {

@@ -6,24 +6,24 @@ const { UserController } = require("../controllers");
 const UserRouter = express.Router();
 
 UserRouter.get("/", UserController.getUsers);
-UserRouter.get("/:idUser", UserController.getUser, notFound);
+UserRouter.get("/:idUser", UserController.getSingleUser, notFound);
 UserRouter.post("/", UserController.createUser);
 UserRouter.put("/:idUser", UserController.updateUser, notFound);
 UserRouter.delete("/:idUser", UserController.deleteUser, notFound);
 UserRouter.delete("/", UserController.deleteUsers);
 
-UserRouter.get("/:idUser/addresses", UserController.getUserAddresses);
-UserRouter.get("/:idUser/addresses/:idAddress", UserController.getUserAddress);
-UserRouter.post("/:idUser/addresses/", UserController.addUserAddress);
-UserRouter.put(
+UserRouter.get("/:idUser/addresses", UserController.getAddresses);
+UserRouter.get(
   "/:idUser/addresses/:idAddress",
-  UserController.updateUserAddress,
+  UserController.getSingleAddress,
 );
+UserRouter.post("/:idUser/addresses/", UserController.addAddress);
+UserRouter.put("/:idUser/addresses/:idAddress", UserController.updateAddress);
 UserRouter.delete(
   "/:idUser/addresses/:idAddress",
-  UserController.deleteUserAddress,
+  UserController.deleteAddress,
 );
-UserRouter.delete("/:id/addresses/", UserController.deleteUserAddresses);
+UserRouter.delete("/:id/addresses/", UserController.deleteAddresses);
 
 UserRouter.use("/:id/addresses", notFound);
 UserRouter.use("/", notFound);

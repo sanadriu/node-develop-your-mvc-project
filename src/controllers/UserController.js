@@ -16,7 +16,7 @@ async function getUsers(req, res, next) {
   }
 }
 
-async function getUser(req, res, next) {
+async function getSingleUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
@@ -115,7 +115,7 @@ async function deleteUsers(req, res, next) {
   }
 }
 
-async function getUserAddresses(req, res, next) {
+async function getAddresses(req, res, next) {
   const { idUser } = req.params;
 
   try {
@@ -137,7 +137,7 @@ async function getUserAddresses(req, res, next) {
   }
 }
 
-async function getUserAddress(req, res, next) {
+async function getSingleAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
@@ -163,7 +163,7 @@ async function getUserAddress(req, res, next) {
   }
 }
 
-async function addUserAddress(req, res, next) {
+async function addAddress(req, res, next) {
   const { idUser } = req.params;
   const address = req.body;
 
@@ -193,7 +193,7 @@ async function addUserAddress(req, res, next) {
   }
 }
 
-async function updateUserAddress(req, res, next) {
+async function updateAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
   const address = req.body;
 
@@ -225,7 +225,7 @@ async function updateUserAddress(req, res, next) {
   }
 }
 
-async function deleteUserAddress(req, res, next) {
+async function deleteAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
@@ -256,7 +256,7 @@ async function deleteUserAddress(req, res, next) {
   }
 }
 
-async function deleteUserAddresses(req, res, next) {
+async function deleteAddresses(req, res, next) {
   const { id } = req.params;
 
   try {
@@ -288,15 +288,15 @@ async function deleteUserAddresses(req, res, next) {
 
 module.exports = {
   getUsers,
-  getUser,
+  getSingleUser,
   createUser,
   updateUser,
   deleteUser,
   deleteUsers,
-  getUserAddresses,
-  getUserAddress,
-  addUserAddress,
-  updateUserAddress,
-  deleteUserAddress,
-  deleteUserAddresses,
+  getAddresses,
+  getSingleAddress,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  deleteAddresses,
 };
