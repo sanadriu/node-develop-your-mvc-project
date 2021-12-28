@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
+const validator = require("validator");
 
-const ProductSchema = Schema({
+const productSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -20,8 +21,22 @@ const ProductSchema = Schema({
     type: String,
     trim: true,
   },
+  images: [
+    {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          return validator.isURL(value);
+        },
+        message: function (props) {
+          return `${props.value} is not a valid URL for image`;
+        },
+      },
+    },
+  ],
 });
 
-const ProductModel = model("products", ProductSchema);
+const ProductModel = model("products", productSchema);
 
 module.exports = ProductModel;

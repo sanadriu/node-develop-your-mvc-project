@@ -4,7 +4,6 @@ async function getProducts(req, res, next) {
   try {
     const result = await ProductModel.find({})
       .select("-__v -createdAt -updatedAt")
-      .lean()
       .exec();
 
     res.status(200).send({

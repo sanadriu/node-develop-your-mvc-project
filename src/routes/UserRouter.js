@@ -3,23 +3,28 @@ const express = require("express");
 const {
   notFound,
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware,
 } = require("../middlewares");
 const { UserController } = require("../controllers");
 
-function allowUsers({ user: { role, _id }, params: { idUser } }) {
+function allowUsers({ user: { role, id }, params: { idUser } }) {
+  console.log(role, id, idUser);
+
   return (
     ["admin", "full-admin"].includes(role) ||
-    (role === "customer" && _id === idUser)
+    (role === "customer" && id === idUser)
   );
 }
 
 function allowAdmins({ user: { role } }) {
+  console.log(role);
+
   return ["admin", "full-admin"].includes(role);
 }
 
 function allowFullAdmins({ user: { role } }) {
+  console.log(role);
   return role === "root";
 }
 
@@ -28,7 +33,7 @@ const UserRouter = express.Router();
 UserRouter.get(
   "/",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowAdmins),
   UserController.getUsers,
 );
@@ -36,7 +41,7 @@ UserRouter.get(
 UserRouter.get(
   "/:idUser",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleUser,
   notFound,
@@ -45,23 +50,20 @@ UserRouter.get(
 UserRouter.post(
   "/",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowFullAdmins),
   UserController.createUser,
 );
 
-UserRouter.post(
-  "/",
-  authMiddleware,
-  userMiddleware,
-  filterMiddleware(allowFullAdmins),
-  UserController.createUser,
-);
+// Unrestricted user creation. Be careful.
+// UserRouter.post("/", UserController.createUser);
+
+UserRouter.post("/sign-up", UserController.signUp);
 
 UserRouter.put(
   "/:idUser",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowFullAdmins),
   UserController.updateUser,
   notFound,
@@ -69,16 +71,16 @@ UserRouter.put(
 
 UserRouter.delete(
   "/",
-  authMiddleware,
-  userMiddleware,
-  filterMiddleware(allowFullAdmins),
+  // authMiddleware,
+  // accessMiddleware,
+  // filterMiddleware(allowFullAdmins),
   UserController.deleteUsers,
 );
 
 UserRouter.delete(
   "/:idUser",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowFullAdmins),
   UserController.deleteSingleUser,
   notFound,
@@ -87,7 +89,7 @@ UserRouter.delete(
 UserRouter.get(
   "/:idUser/details",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getDetails,
   notFound,
@@ -96,7 +98,7 @@ UserRouter.get(
 UserRouter.put(
   "/:idUser/details",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.updateDetails,
   notFound,
@@ -105,7 +107,7 @@ UserRouter.put(
 UserRouter.get(
   "/:idUser/addresses",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getAddresses,
 );
@@ -113,7 +115,7 @@ UserRouter.get(
 UserRouter.get(
   "/:idUser/addresses/:idAddress",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleAddress,
 );
@@ -121,7 +123,7 @@ UserRouter.get(
 UserRouter.post(
   "/:idUser/addresses/",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.addAddress,
 );
@@ -129,7 +131,7 @@ UserRouter.post(
 UserRouter.put(
   "/:idUser/addresses/:idAddress",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.updateAddress,
 );
@@ -137,7 +139,7 @@ UserRouter.put(
 UserRouter.delete(
   "/:id/addresses/",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.deleteAddresses,
 );
@@ -145,7 +147,7 @@ UserRouter.delete(
 UserRouter.delete(
   "/:idUser/addresses/:idAddress",
   authMiddleware,
-  userMiddleware,
+  accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.deleteSingleAddress,
 );

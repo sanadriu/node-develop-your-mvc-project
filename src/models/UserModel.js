@@ -1,17 +1,17 @@
 const { Schema, model } = require("mongoose");
 const validator = require("validator");
 
-const UserSchema = new Schema(
+const userSchema = new Schema(
   {
     uid: {
       type: String,
-      required: true,
+      required: [true, "UID is required"],
       unique: true,
       trim: true,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       trim: true,
       maxlength: [64, "Email length must not be longer than 64 characters"],
@@ -26,8 +26,11 @@ const UserSchema = new Schema(
     },
     role: {
       type: String,
-      required: true,
-      enum: ["customer", "admin", "manager"],
+      enum: {
+        values: ["customer", "admin", "admin-root"],
+        message: "Given role is not valid",
+      },
+      default: "customer",
     },
     name: {
       type: String,
@@ -42,7 +45,14 @@ const UserSchema = new Schema(
     phoneLocale: {
       type: String,
       trim: true,
-      enum: ["es-ES", "fr-FR", "en-GB", "it-IT", "de-DE"],
+      validate: {
+        validator: function (value) {
+          return validator.isLocale(value);
+        },
+        message: function (props) {
+          return `${props.value} is not a valid locale`;
+        },
+      },
     },
     phoneNumber: {
       type: Number,
@@ -62,25 +72,25 @@ const UserSchema = new Schema(
       {
         address: {
           type: String,
-          required: true,
+          required: [true, "Address is required"],
           trim: true,
           maxlength: 64,
         },
         city: {
           type: String,
-          required: true,
+          required: [true, "City is required"],
           trim: true,
           maxlength: 48,
         },
         countryCode: {
           type: String,
-          required: true,
+          required: [true, "Country code is required"],
           trim: true,
           enum: ["ES", "FR", "GB", "DE", "IT"],
         },
         postalCode: {
           type: String,
-          required: true,
+          required: [true, "Postal code is required"],
           trim: true,
           validate: {
             validator: function (value) {
@@ -97,6 +107,19 @@ const UserSchema = new Schema(
   { timestamps: true },
 );
 
-const UserModel = model("user", UserSchema);
+userSchema.set("toJSON", {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret, options) {
+    delete ret._id;
+
+    ret.addresses.forEach((address) => {
+      address.id = address._id;
+      delete address._id;
+    });
+  },
+});
+
+const UserModel = model("user", userSchema);
 
 module.exports = UserModel;

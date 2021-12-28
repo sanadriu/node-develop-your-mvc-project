@@ -42,9 +42,11 @@ async function createUser(req, res, next) {
   try {
     const result = await UserModel.create(user);
 
+    const { _id } = result;
+
     res.status(201).send({
       success: true,
-      data: result._id,
+      data: { _id },
     });
   } catch (error) {
     next(error);
@@ -120,7 +122,7 @@ async function getDetails(req, res, next) {
 
   try {
     const result = await UserModel.findOne({ _id: idUser })
-      .select("-_id name surname phoneNumber phoneLocale")
+      .select("name surname phoneNumber phoneLocale")
       .lean()
       .exec();
 
@@ -155,7 +157,7 @@ async function updateDetails(req, res, next) {
         runValidators: true,
       },
     )
-      .select("-__v -createdAt -updatedAt")
+      .select("name surname phoneNumber phoneLocale")
       .lean()
       .exec();
 
@@ -175,17 +177,15 @@ async function getAddresses(req, res, next) {
 
   try {
     const result = await UserModel.findOne({ _id: idUser })
-      .select(`-_id addresses`)
+      .select(`addresses`)
       .lean()
       .exec();
 
     if (!result) return next();
 
-    const { addresses } = result;
-
     res.status(200).send({
       success: true,
-      data: addresses,
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -196,22 +196,19 @@ async function getSingleAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
-    const result = await UserModel.findOne({ _id: idUser })
-      .select("-_id addresses")
+    const result = await UserModel.findOne({
+      _id: idUser,
+      "addresses._id": idAddress,
+    })
+      .select("addresses")
       .lean()
       .exec();
 
     if (!result) return next();
 
-    const address = result.addresses.find(
-      (address) => address._id == idAddress,
-    );
-
-    if (!address) return next();
-
     res.status(200).send({
       success: true,
-      data: address,
+      data: result.addresses.find((address) => address._id == idAddress),
     });
   } catch (error) {
     next(error);
@@ -235,13 +232,15 @@ async function addAddress(req, res, next) {
         runValidators: true,
       },
     )
-      .select("-_id addresses")
+      .select("addresses")
       .lean()
       .exec();
 
+    if (!result) return next();
+
     res.status(201).send({
       success: true,
-      data: result,
+      data: result.addresses.slice(-1)._id,
     });
   } catch (error) {
     next(error);
@@ -265,7 +264,7 @@ async function updateAddress(req, res, next) {
         runValidators: true,
       },
     )
-      .select("-_id addresses")
+      .select("addresses")
       .lean()
       .exec();
 
@@ -273,7 +272,7 @@ async function updateAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result,
+      data: result.addresses.find((address) => address._id == idAddress),
     });
   } catch (error) {
     next(error);
@@ -296,7 +295,7 @@ async function deleteSingleAddress(req, res, next) {
         runValidators: true,
       },
     )
-      .select("-_id addresses")
+      .select("addresses")
       .lean()
       .exec();
 
@@ -326,7 +325,7 @@ async function deleteAddresses(req, res, next) {
         runValidators: true,
       },
     )
-      .select("-_id addresses")
+      .select("addresses")
       .lean()
       .exec();
 
@@ -341,15 +340,28 @@ async function deleteAddresses(req, res, next) {
 }
 
 async function signUp(req, res, next) {
-  const user = req.body;
+  const { uid, email } = req.body;
 
   try {
-    const result = await UserModel.create({ ...user, role: customer });
+    const user = await UserModel.findOne({ uid, email }).lean().exec();
 
-    res.status(201).send({
-      success: true,
-      data: result._id,
-    });
+    console.log(user);
+
+    if (user) {
+      res.status(200).send({
+        success: true,
+        message: "User already existed",
+        data: { _id: user._id },
+      });
+    } else {
+      const newUser = await UserModel.create({ uid, email, role: "customer" });
+
+      res.status(201).send({
+        success: true,
+        message: "User account has been created successfully.",
+        data: { _id: newUser._id },
+      });
+    }
   } catch (error) {
     next(error);
   }
