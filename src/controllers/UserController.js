@@ -25,12 +25,17 @@ async function getSingleUser(req, res, next) {
       .lean()
       .exec();
 
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result,
-    });
+    if (result) {
+      res.status(200).send({
+        success: true,
+        data: result,
+      });
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -42,11 +47,9 @@ async function createUser(req, res, next) {
   try {
     const result = await UserModel.create(user);
 
-    const { _id } = result;
-
     res.status(201).send({
       success: true,
-      data: { _id },
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -72,18 +75,23 @@ async function updateUser(req, res, next) {
       .lean()
       .exec();
 
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result,
-    });
+    if (result) {
+      res.status(200).send({
+        success: true,
+        data: result,
+      });
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
   } catch (error) {
     next(error);
   }
 }
 
-async function deleteSingleUser(req, res, next) {
+async function deleteUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
@@ -92,11 +100,16 @@ async function deleteSingleUser(req, res, next) {
       .lean()
       .exec();
 
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-    });
+    if (result) {
+      res.status(200).send({
+        success: true,
+      });
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -117,61 +130,6 @@ async function deleteUsers(req, res, next) {
   }
 }
 
-async function getDetails(req, res, next) {
-  const { idUser } = req.params;
-
-  try {
-    const result = await UserModel.findOne({ _id: idUser })
-      .select("name surname phoneNumber phoneLocale")
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function updateDetails(req, res, next) {
-  const { idUser } = req.params;
-  const { name, surname, phoneNumber, phoneLocale } = req.body;
-
-  try {
-    const result = await UserModel.findOneAndUpdate(
-      { _id: idUser },
-      {
-        $set: {
-          name,
-          surname,
-          phoneNumber,
-          phoneLocale,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-      .select("name surname phoneNumber phoneLocale")
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
 async function getAddresses(req, res, next) {
   const { idUser } = req.params;
 
@@ -181,12 +139,17 @@ async function getAddresses(req, res, next) {
       .lean()
       .exec();
 
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result,
-    });
+    if (result) {
+      res.status(200).send({
+        success: true,
+        data: result,
+      });
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -279,7 +242,7 @@ async function updateAddress(req, res, next) {
   }
 }
 
-async function deleteSingleAddress(req, res, next) {
+async function deleteAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
@@ -288,36 +251,6 @@ async function deleteSingleAddress(req, res, next) {
       {
         $pull: {
           addresses: { _id: idAddress },
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-      .select("addresses")
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function deleteAddresses(req, res, next) {
-  const { id } = req.params;
-
-  try {
-    const result = await UserModel.findOneAndUpdate(
-      { _id: id },
-      {
-        $set: {
-          addresses: [],
         },
       },
       {
@@ -372,15 +305,12 @@ module.exports = {
   getSingleUser,
   createUser,
   updateUser,
-  deleteSingleUser,
+  deleteUser,
   deleteUsers,
-  getDetails,
-  updateDetails,
   getAddresses,
   getSingleAddress,
   addAddress,
   updateAddress,
-  deleteSingleAddress,
-  deleteAddresses,
+  deleteAddress,
   signUp,
 };
