@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-const config = require("../config/config");
+const config = require("../config");
 
-function connection() {
+function connect() {
   return mongoose.connect(config.db.url, {
     autoIndex: true,
   });
 }
 
-module.exports = connection;
+module.exports = { connect };

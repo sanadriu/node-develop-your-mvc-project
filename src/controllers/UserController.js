@@ -2,10 +2,7 @@ const { UserModel } = require("../models");
 
 async function getUsers(req, res, next) {
   try {
-    const result = await UserModel.find({})
-      .select("-__v -createdAt -updatedAt")
-      .lean()
-      .exec();
+    const result = await UserModel.find({}).select("-__v -createdAt -updatedAt").lean().exec();
 
     res.status(200).send({
       success: true,
@@ -20,10 +17,7 @@ async function getSingleUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findOne({ _id: idUser })
-      .select("-__v -createdAt -updatedAt")
-      .lean()
-      .exec();
+    const result = await UserModel.findById(idUser).select("-__v -createdAt -updatedAt").lean().exec();
 
     if (result) {
       res.status(200).send({
@@ -61,8 +55,8 @@ async function updateUser(req, res, next) {
   const user = req.body;
 
   try {
-    const result = await UserModel.findOneAndUpdate(
-      { _id: idUser },
+    const result = await UserModel.findByIdAndUpdate(
+      idUser,
       {
         $set: user,
       },
@@ -95,10 +89,7 @@ async function deleteUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findOneAndDelete({ _id: idUser })
-      .select("-__v -createdAt -updatedAt")
-      .lean()
-      .exec();
+    const result = await UserModel.findByIdAndDelete(idUser).select("-__v -createdAt -updatedAt").lean().exec();
 
     if (result) {
       res.status(200).send({
@@ -134,10 +125,7 @@ async function getAddresses(req, res, next) {
   const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findOne({ _id: idUser })
-      .select(`addresses`)
-      .lean()
-      .exec();
+    const result = await UserModel.findById(idUser).select(`addresses`).lean().exec();
 
     if (result) {
       res.status(200).send({
@@ -159,7 +147,7 @@ async function getSingleAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
-    const result = await UserModel.findOne({
+    const result = await UserModel.findById({
       _id: idUser,
       "addresses._id": idAddress,
     })
@@ -183,8 +171,8 @@ async function addAddress(req, res, next) {
   const address = req.body;
 
   try {
-    const result = await UserModel.findOneAndUpdate(
-      { _id: idUser },
+    const result = await UserModel.findByIdAndUpdate(
+      idUser,
       {
         $push: {
           addresses: address,
@@ -246,8 +234,8 @@ async function deleteAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
-    const result = await UserModel.findOneAndUpdate(
-      { _id: idUser },
+    const result = await UserModel.findByIdAndUpdate(
+      idUser,
       {
         $pull: {
           addresses: { _id: idAddress },

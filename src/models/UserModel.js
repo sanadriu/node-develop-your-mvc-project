@@ -32,15 +32,15 @@ const userSchema = new Schema(
       },
       default: "customer",
     },
-    name: {
+    firstName: {
       type: String,
       trim: true,
-      maxlength: [32, "Name length must not be longer than 32 characters"],
+      maxlength: [32, "Firstname length must not be longer than 32 characters"],
     },
-    surname: {
+    lastName: {
       type: String,
       trim: true,
-      maxlength: [32, "Surname length must not be longer than 32 characters"],
+      maxlength: [32, "Lastname length must not be longer than 32 characters"],
     },
     phoneLocale: {
       type: String,
@@ -55,13 +55,11 @@ const userSchema = new Schema(
       },
     },
     phoneNumber: {
-      type: Number,
+      type: String,
       trim: true,
       validate: {
         validator: function (value) {
-          return this.phoneLocale
-            ? validator.isMobilePhone(value.toString(), this.phoneLocale)
-            : true;
+          return this.phoneLocale ? validator.isMobilePhone(value, this.phoneLocale, { strictMode: true }) : true;
         },
         message: function (props) {
           return `${props.value} is not a valid phone for the specified locale`;
@@ -74,19 +72,26 @@ const userSchema = new Schema(
           type: String,
           required: [true, "Address is required"],
           trim: true,
-          maxlength: 64,
+          maxlength: [64, "Address length must not be longer than 64 characters"],
         },
         city: {
           type: String,
           required: [true, "City is required"],
           trim: true,
-          maxlength: 48,
+          maxlength: [64, "City length must not be longer than 64 characters"],
         },
         countryCode: {
           type: String,
           required: [true, "Country code is required"],
           trim: true,
-          enum: ["ES", "FR", "GB", "DE", "IT"],
+          validate: {
+            validator: function (value) {
+              return validator.isISO31661Alpha2(value);
+            },
+            message: function (props) {
+              return `${props.value} is not a valid country code`;
+            },
+          },
         },
         postalCode: {
           type: String,
@@ -97,7 +102,7 @@ const userSchema = new Schema(
               return validator.isPostalCode(value, this.countryCode);
             },
             message: function (props) {
-              return `${props.value} is not a valid postal code for the specified country`;
+              return `${props.value} is not a valid postal code for the given country code`;
             },
           },
         },

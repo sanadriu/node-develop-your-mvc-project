@@ -1,4 +1,4 @@
-const config = require("./config/config");
+const config = require("./config");
 
 const express = require("express");
 const helmet = require("helmet");
