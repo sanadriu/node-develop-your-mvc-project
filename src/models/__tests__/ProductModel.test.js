@@ -17,24 +17,22 @@ describe("Product Schema", () => {
     await db.stop();
   });
 
-  const correctProductData = [
-    {
-      title: "Flaming bonsai",
-      price: 14.99,
-      stock: 45,
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt sem id diam suscipit, quis commodo urna aliquam. Etiam maximus posuere congue. Maecenas congue felis sit amet dui bibendum, et accumsan arcu consequat.",
-      images: [
-        "https://images.unsplash.com/photo-1467043198406-dc953a3defa0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1929&q=80",
-      ],
-    },
-  ];
+  const correctProductData = {
+    title: "Flaming bonsai",
+    price: 14.99,
+    stock: 45,
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tincidunt sem id diam suscipit, quis commodo urna aliquam. Etiam maximus posuere congue. Maecenas congue felis sit amet dui bibendum, et accumsan arcu consequat.",
+    images: [
+      "https://images.unsplash.com/photo-1467043198406-dc953a3defa0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1929&q=80",
+    ],
+  };
 
   describe("1. title:", () => {
     test("1.1. title is required", async () => {
       expect.assertions(2);
 
-      const { title, ...productData } = correctProductData[0];
+      const { title, ...productData } = correctProductData;
 
       try {
         await ProductModel.create(productData);
@@ -45,21 +43,21 @@ describe("Product Schema", () => {
     });
 
     test("1.2. title is trimmed", async () => {
+      expect.assertions(1);
+
       const productData = {
-        ...correctProductData[0],
-        title: ` ${correctProductData[0].title} `,
+        ...correctProductData,
+        title: ` ${correctProductData.title} `,
       };
 
-      const product = await ProductModel.create(productData);
-
-      expect(product.title).toBe(correctProductData[0].title);
+      await expect(ProductModel.create(productData)).resolves.toHaveProperty("title", correctProductData.title);
     });
 
     test("1.3. title max length is 64", async () => {
       expect.assertions(2);
 
       const productData = {
-        ...correctProductData[0],
+        ...correctProductData,
         title: generateRandomSequence(65),
       };
 
@@ -74,21 +72,24 @@ describe("Product Schema", () => {
 
   describe("2. description:", () => {
     test("2.1. description is trimmed", async () => {
+      expect.assertions(1);
+
       const productData = {
-        ...correctProductData[0],
-        description: ` ${correctProductData[0].description} `,
+        ...correctProductData,
+        description: ` ${correctProductData.description} `,
       };
 
-      const product = await ProductModel.create(productData);
-
-      expect(product.description).toBe(correctProductData[0].description);
+      await expect(ProductModel.create(productData)).resolves.toHaveProperty(
+        "description",
+        correctProductData.description,
+      );
     });
 
     test("2.2. description max length is 64", async () => {
       expect.assertions(2);
 
       const productData = {
-        ...correctProductData[0],
+        ...correctProductData,
         description: generateRandomSequence(513),
       };
 
@@ -107,7 +108,7 @@ describe("Product Schema", () => {
     test("3.1. price is required", async () => {
       expect.assertions(2);
 
-      const { price, ...productData } = correctProductData[0];
+      const { price, ...productData } = correctProductData;
 
       try {
         await ProductModel.create(productData);
@@ -119,7 +120,7 @@ describe("Product Schema", () => {
 
     test("3.2. price must be numeric", async () => {
       const productData = {
-        ...correctProductData[0],
+        ...correctProductData,
         price: "zero",
       };
 
@@ -134,7 +135,7 @@ describe("Product Schema", () => {
       expect.assertions(2);
 
       const productData = {
-        ...correctProductData[0],
+        ...correctProductData,
         price: -1,
       };
 
@@ -149,7 +150,7 @@ describe("Product Schema", () => {
 
   describe("4. stock:", () => {
     test("4.1. stock has a default value of 0", async () => {
-      const { stock, ...productData } = correctProductData[0];
+      const { stock, ...productData } = correctProductData;
 
       const product = await ProductModel.create(productData);
 
@@ -158,7 +159,7 @@ describe("Product Schema", () => {
 
     test("4.2. stock must be numeric", async () => {
       const productData = {
-        ...correctProductData[0],
+        ...correctProductData,
         stock: "one",
       };
 
@@ -173,7 +174,7 @@ describe("Product Schema", () => {
       expect.assertions(2);
 
       const productData = {
-        ...correctProductData[0],
+        ...correctProductData,
         stock: -1,
       };
 
@@ -188,20 +189,20 @@ describe("Product Schema", () => {
 
   describe("5. images:", () => {
     test("5.1. image URL is trimmed", async () => {
-      const productData = deepClone(correctProductData[0]);
+      expect.assertions(1);
 
-      productData.images[0] = ` ${correctProductData[0].images[0]} `;
+      const productData = deepClone(correctProductData);
 
-      const product = await ProductModel.create(productData);
+      productData.images[0] = ` ${correctProductData.images[0]} `;
 
-      expect(product.images[0]).toBe(correctProductData[0].images[0]);
+      await expect(ProductModel.create(productData)).resolves.toHaveProperty("images.0", correctProductData.images[0]);
     });
 
     test("5.2. image URL is valid", async () => {
       expect.assertions(2);
 
       const url = generateRandomSequence(16);
-      const productData = deepClone(correctProductData[0]);
+      const productData = deepClone(correctProductData);
 
       productData.images[0] = url;
 

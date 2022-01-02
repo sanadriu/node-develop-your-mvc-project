@@ -17,44 +17,33 @@ describe("User Schema", () => {
     await db.stop();
   });
 
-  const correctUserData = [
-    {
-      uid: "0000",
-      email: "mail@foo.com",
-      firstName: "Alice",
-      lastName: "Anderson",
-      phoneLocale: "es-ES",
-      phoneNumber: "+34600000000",
-      addresses: [
-        {
-          address: "False Street, 123",
-          countryCode: "ES",
-          postalCode: "09999",
-          city: "Barcelona",
-        },
-        {
-          address: "Lollypop Avenue, 1337",
-          countryCode: "GB",
-          postalCode: "EN1",
-          city: "Enfield",
-        },
-      ],
-    },
-    {
-      uid: "1111",
-      email: "mail@bar.baz",
-      firstName: "John",
-      lastName: "Smith",
-      phoneLocale: "en-GB",
-      phoneNumber: "+447700000000",
-    },
-  ];
-
+  const correctUserData = {
+    uid: "0000",
+    email: "mail@foo.com",
+    firstName: "Alice",
+    lastName: "Anderson",
+    phoneLocale: "es-ES",
+    phoneNumber: "+34600000000",
+    addresses: [
+      {
+        address: "False Street, 123",
+        countryCode: "ES",
+        postalCode: "09999",
+        city: "Barcelona",
+      },
+      {
+        address: "Lollypop Avenue, 1337",
+        countryCode: "GB",
+        postalCode: "EN1",
+        city: "Enfield",
+      },
+    ],
+  };
   describe("1. uid:", () => {
     test("1.1. uid is required", async () => {
       expect.assertions(2);
 
-      const { uid, ...userData } = correctUserData[0];
+      const { uid, ...userData } = correctUserData;
 
       try {
         await UserModel.create(userData);
@@ -68,8 +57,8 @@ describe("User Schema", () => {
       expect.assertions(2);
 
       try {
-        await UserModel.create({ ...correctUserData[0], uid: "5555" });
-        await UserModel.create({ ...correctUserData[1], uid: "5555" });
+        await UserModel.create({ ...correctUserData });
+        await UserModel.create({ ...correctUserData, email: "other@mail.com" });
       } catch (error) {
         expect(error.keyPattern).toHaveProperty("uid");
         expect(error.code).toBe(11000);
@@ -77,14 +66,14 @@ describe("User Schema", () => {
     });
 
     test("1.3. uid is trimmed", async () => {
+      expect.assertions(1);
+
       const userData = {
-        ...correctUserData[0],
-        uid: ` ${correctUserData[0].uid} `,
+        ...correctUserData,
+        uid: ` ${correctUserData.uid} `,
       };
 
-      const user = await UserModel.create(userData);
-
-      expect(user.uid).toBe(correctUserData[0].uid);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty("uid", correctUserData.uid);
     });
   });
 
@@ -92,7 +81,7 @@ describe("User Schema", () => {
     test("2.1. email is required", async () => {
       expect.assertions(2);
 
-      const { email, ...userData } = correctUserData[0];
+      const { email, ...userData } = correctUserData;
 
       try {
         await UserModel.create(userData);
@@ -106,8 +95,8 @@ describe("User Schema", () => {
       expect.assertions(2);
 
       try {
-        await UserModel.create({ ...correctUserData[0], email: "test@test.com" });
-        await UserModel.create({ ...correctUserData[1], email: "test@test.com" });
+        await UserModel.create({ ...correctUserData });
+        await UserModel.create({ ...correctUserData, uid: "5555" });
       } catch (error) {
         expect(error.keyPattern).toHaveProperty("email");
         expect(error.code).toBe(11000);
@@ -115,21 +104,21 @@ describe("User Schema", () => {
     });
 
     test("2.3. email is trimmed", async () => {
+      expect.assertions(1);
+
       const userData = {
-        ...correctUserData[0],
-        email: ` ${correctUserData[0].email} `,
+        ...correctUserData,
+        email: ` ${correctUserData.email} `,
       };
 
-      const user = await UserModel.create(userData);
-
-      expect(user.email).toBe(correctUserData[0].email);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty("email", correctUserData.email);
     });
 
     test("2.4. email max length is 64", async () => {
       expect.assertions(2);
 
       const userData = {
-        ...correctUserData[0],
+        ...correctUserData,
         email: `${generateRandomSequence(57)}@foo.bar`,
       };
 
@@ -147,7 +136,7 @@ describe("User Schema", () => {
       const email = generateRandomSequence(16);
 
       const userData = {
-        ...correctUserData[0],
+        ...correctUserData,
         email,
       };
 
@@ -162,21 +151,21 @@ describe("User Schema", () => {
 
   describe("3. firstname:", () => {
     test("3.1. firstname is trimmed", async () => {
+      expect.assertions(1);
+
       const userData = {
-        ...correctUserData[0],
-        firstName: ` ${correctUserData[0].firstName} `,
+        ...correctUserData,
+        firstName: ` ${correctUserData.firstName} `,
       };
 
-      const user = await UserModel.create(userData);
-
-      expect(user.firstName).toBe(correctUserData[0].firstName);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty("firstName", correctUserData.firstName);
     });
 
     test("3.2. firstname max length is 32", async () => {
       expect.assertions(2);
 
       const userData = {
-        ...correctUserData[0],
+        ...correctUserData,
         firstName: generateRandomSequence(33),
       };
 
@@ -193,21 +182,21 @@ describe("User Schema", () => {
 
   describe("4. lastname:", () => {
     test("4.1. lastname is trimmed", async () => {
+      expect.assertions(1);
+
       const userData = {
-        ...correctUserData[0],
-        lastName: ` ${correctUserData[0].lastName} `,
+        ...correctUserData,
+        lastName: ` ${correctUserData.lastName} `,
       };
 
-      const user = await UserModel.create(userData);
-
-      expect(user.lastName).toBe(correctUserData[0].lastName);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty("lastname", correctUserData.lastname);
     });
 
     test("4.2. lastname max length is 32", async () => {
       expect.assertions(2);
 
       const userData = {
-        ...correctUserData[0],
+        ...correctUserData,
         lastName: generateRandomSequence(33),
       };
 
@@ -223,13 +212,13 @@ describe("User Schema", () => {
   describe("5. phone number:", () => {
     test("5.1. phone number is trimmed", async () => {
       const userData = {
-        ...correctUserData[0],
-        phoneNumber: ` ${correctUserData[0].phoneNumber} `,
+        ...correctUserData,
+        phoneNumber: ` ${correctUserData.phoneNumber} `,
       };
 
       const user = await UserModel.create(userData);
 
-      expect(user.phoneNumber).toBe(correctUserData[0].phoneNumber);
+      expect(user.phoneNumber).toBe(correctUserData.phoneNumber);
     });
 
     test("5.2. phone number is valid", async () => {
@@ -238,7 +227,7 @@ describe("User Schema", () => {
       const phoneNumber = "+3460100100";
 
       const userData = {
-        ...correctUserData[0],
+        ...correctUserData,
         phoneNumber,
       };
 
@@ -258,7 +247,7 @@ describe("User Schema", () => {
       test("6.1.1. address is required", async () => {
         expect.assertions(2);
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         delete userData.addresses[0].address;
 
         try {
@@ -270,18 +259,21 @@ describe("User Schema", () => {
       });
 
       test("6.1.2 address is trimmed", async () => {
-        const userData = deepClone(correctUserData[0]);
-        userData.addresses[0].address = ` ${correctUserData[0].addresses[0].address} `;
+        expect.assertions(1);
 
-        const user = await UserModel.create(userData);
+        const userData = deepClone(correctUserData);
+        userData.addresses[0].address = ` ${correctUserData.addresses[0].address} `;
 
-        expect(user.addresses[0].address).toBe(correctUserData[0].addresses[0].address);
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "addresses.0.address",
+          correctUserData.addresses[0].address,
+        );
       });
 
-      test("6.2.3 address max length is 64", async () => {
+      test("6.1.3 address max length is 64", async () => {
         expect.assertions(2);
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         userData.addresses[0].address = generateRandomSequence(65);
 
         try {
@@ -299,7 +291,7 @@ describe("User Schema", () => {
       test("6.2.1. city is required", async () => {
         expect.assertions(2);
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         delete userData.addresses[0].city;
 
         try {
@@ -311,18 +303,21 @@ describe("User Schema", () => {
       });
 
       test("6.2.2. city is trimmed", async () => {
-        const userData = deepClone(correctUserData[0]);
-        userData.addresses[0].city = ` ${correctUserData[0].addresses[0].city} `;
+        expect.assertions(1);
 
-        const user = await UserModel.create(userData);
+        const userData = deepClone(correctUserData);
+        userData.addresses[0].city = ` ${correctUserData.addresses[0].city} `;
 
-        expect(user.addresses[0].city).toBe(correctUserData[0].addresses[0].city);
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "addresses.0.city",
+          correctUserData.addresses[0].city,
+        );
       });
 
       test("6.2.3. city max length is 64", async () => {
         expect.assertions(2);
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         userData.addresses[0].city = generateRandomSequence(65);
 
         try {
@@ -340,7 +335,7 @@ describe("User Schema", () => {
       test("6.3.1. country code is required", async () => {
         expect.assertions(2);
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         delete userData.addresses[0].countryCode;
 
         try {
@@ -352,12 +347,15 @@ describe("User Schema", () => {
       });
 
       test("6.3.2. country code is trimmed", async () => {
-        const userData = deepClone(correctUserData[0]);
-        userData.addresses[0].countryCode = ` ${correctUserData[0].addresses[0].countryCode} `;
+        expect.assertions(1);
 
-        const user = await UserModel.create(userData);
+        const userData = deepClone(correctUserData);
+        userData.addresses[0].countryCode = ` ${correctUserData.addresses[0].countryCode} `;
 
-        expect(user.addresses[0].countryCode).toBe(correctUserData[0].addresses[0].countryCode);
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "addresses.0.countryCode",
+          correctUserData.addresses[0].countryCode,
+        );
       });
 
       test("6.3.3. country code is valid", async () => {
@@ -365,7 +363,7 @@ describe("User Schema", () => {
 
         const countryCode = "PI";
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         userData.addresses[0].countryCode = countryCode;
 
         try {
@@ -383,7 +381,7 @@ describe("User Schema", () => {
       test("6.3.1. postal code is required", async () => {
         expect.assertions(2);
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         delete userData.addresses[0].postalCode;
 
         try {
@@ -395,12 +393,15 @@ describe("User Schema", () => {
       });
 
       test("6.3.2. postal code is trimmed", async () => {
-        const userData = deepClone(correctUserData[0]);
-        userData.addresses[0].postalCode = ` ${correctUserData[0].addresses[0].postalCode} `;
+        expect.assertions(1);
 
-        const user = await UserModel.create(userData);
+        const userData = deepClone(correctUserData);
+        userData.addresses[0].postalCode = ` ${correctUserData.addresses[0].postalCode} `;
 
-        expect(user.addresses[0].postalCode).toBe(correctUserData[0].addresses[0].postalCode);
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "addresses.0.postalCode",
+          correctUserData.addresses[0].postalCode,
+        );
       });
 
       test("6.3.3. postal code is valid", async () => {
@@ -408,7 +409,7 @@ describe("User Schema", () => {
 
         const postalCode = "EN1";
 
-        const userData = deepClone(correctUserData[0]);
+        const userData = deepClone(correctUserData);
         userData.addresses[0].postalCode = postalCode;
 
         try {
@@ -419,6 +420,76 @@ describe("User Schema", () => {
             `${postalCode} is not a valid postal code for the given country code`,
           );
         }
+      });
+    });
+
+    describe("7. role:", () => {
+      test("7.1. 'customer' role is valid", async () => {
+        expect.assertions(1);
+
+        const userData = {
+          ...correctUserData,
+          role: "customer",
+        };
+
+        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "customer");
+      });
+
+      test("7.2. 'admin' role is valid", async () => {
+        expect.assertions(1);
+
+        const userData = {
+          ...correctUserData,
+          role: "admin",
+        };
+
+        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "admin");
+      });
+
+      test("7.3. 'main-admin' role is valid", async () => {
+        expect.assertions(1);
+
+        const userData = {
+          ...correctUserData,
+          role: "main-admin",
+        };
+
+        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "main-admin");
+      });
+
+      test("7.4. 'customer' role is the default value", async () => {
+        expect.assertions(1);
+
+        const userData = { ...correctUserData };
+
+        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "customer");
+      });
+
+      test("7.5. other given roles are not valid", async () => {
+        expect.assertions(2);
+
+        const userData = {
+          ...correctUserData,
+          role: "dummy",
+        };
+
+        try {
+          await UserModel.create(userData);
+        } catch (error) {
+          expect(error.errors.role.properties.type).toBe("enum");
+          expect(error.errors.role.properties.message).toBe("The given role is not valid");
+        }
+      });
+
+      test("7.6. role is trimmed", async () => {
+        expect.assertions(1);
+
+        const userData = {
+          ...correctUserData,
+          role: " customer ",
+        };
+
+        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "customer");
       });
     });
   });
