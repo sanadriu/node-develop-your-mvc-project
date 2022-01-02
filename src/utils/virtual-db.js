@@ -42,16 +42,11 @@ function VirtualDB() {
     }
   }
 
-  async function clearCollection(name) {
-    await mongoose.connection.db.collection(name).deleteMany();
-  }
-
   return {
     start,
     stop,
     debug,
     connect,
-    clearCollection,
   };
 }
 

@@ -9,8 +9,8 @@ describe("Product Schema", () => {
     await db.connect();
   });
 
-  afterEach(async () => {
-    await db.clearCollection("users");
+  beforeEach(async () => {
+    await ProductModel.deleteMany();
   });
 
   afterAll(async () => {

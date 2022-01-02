@@ -9,8 +9,8 @@ describe("User Schema", () => {
     await db.connect();
   });
 
-  afterEach(async () => {
-    await db.clearCollection("users");
+  beforeEach(async () => {
+    await UserModel.deleteMany();
   });
 
   afterAll(async () => {

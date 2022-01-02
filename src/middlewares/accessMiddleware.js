@@ -5,16 +5,13 @@ async function accessMiddleware(req, res, next) {
     if (!req.user?.uid) {
       return res.status(403).send({
         success: false,
-        message: "Forbidden: User UID token not found in the request",
+        message: "Forbidden: Authentication required",
       });
     }
 
     const { uid } = req.user;
 
-    const result = await UserModel.findOne({ uid })
-      .select("_id role")
-      .lean()
-      .exec();
+    const result = await UserModel.findOne({ uid }).select("_id role").lean().exec();
 
     if (!result)
       return res.status(403).send({
@@ -22,11 +19,11 @@ async function accessMiddleware(req, res, next) {
         message: "Forbidden: Unregistered user",
       });
 
-    const { role, _id: id } = result;
+    const { role, _id } = result;
 
     req.user = {
-      ...req?.user,
-      id,
+      ...req.user,
+      id: _id.toString(),
       role,
     };
 

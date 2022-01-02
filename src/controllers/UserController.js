@@ -1,3 +1,4 @@
+const { Types } = require("mongoose");
 const { UserModel } = require("../models");
 
 async function getUsers(req, res, next) {
@@ -17,7 +18,17 @@ async function getSingleUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findById(idUser).select("-__v -createdAt -updatedAt").lean().exec();
+    if (!Types.ObjectId.isValid(idUser)) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const result = await UserModel.findById(idUser)
+      .select("-__v -createdAt -updatedAt")
+      .lean()
+      .exec();
 
     if (result) {
       res.status(200).send({
@@ -39,7 +50,7 @@ async function createUser(req, res, next) {
   const user = req.body;
 
   try {
-    const result = await UserModel.create(user);
+    const { __v, createdAt, updatedAt, ...result } = (await UserModel.create(user)).toJSON();
 
     res.status(201).send({
       success: true,
@@ -55,6 +66,13 @@ async function updateUser(req, res, next) {
   const user = req.body;
 
   try {
+    if (!Types.ObjectId.isValid(idUser)) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     const result = await UserModel.findByIdAndUpdate(
       idUser,
       {
@@ -89,7 +107,17 @@ async function deleteUser(req, res, next) {
   const { idUser } = req.params;
 
   try {
-    const result = await UserModel.findByIdAndDelete(idUser).select("-__v -createdAt -updatedAt").lean().exec();
+    if (!Types.ObjectId.isValid(idUser)) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const result = await UserModel.findByIdAndDelete(idUser)
+      .select("-__v -createdAt -updatedAt")
+      .lean()
+      .exec();
 
     if (result) {
       res.status(200).send({

@@ -9,23 +9,22 @@ const {
 const { UserController } = require("../controllers");
 
 function allowUsers({ user: { role, id }, params: { idUser } }) {
-  console.log(role, id, idUser);
-
   return (
-    ["admin", "full-admin"].includes(role) ||
+    ["admin", "main-admin"].includes(role) ||
     (role === "customer" && id === idUser)
   );
 }
 
-function allowAdmins({ user: { role } }) {
-  console.log(role);
-
-  return ["admin", "full-admin"].includes(role);
+function allowAdmin({ user: { role } }) {
+  return ["admin", "main-admin"].includes(role);
 }
 
-function allowFullAdmins({ user: { role } }) {
-  console.log(role);
-  return role === "root";
+function allowMain({ user: { role } }) {
+  return role === "main-admin";
+}
+
+function denySelf({ user: { role, id }, params: { idUser } }) {
+  return id !== idUser;
 }
 
 const UserRouter = express.Router();
@@ -34,7 +33,7 @@ UserRouter.get(
   "/",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowAdmins),
+  filterMiddleware(allowAdmin),
   UserController.getUsers,
 );
 
@@ -44,19 +43,15 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleUser,
-  notFound,
 );
 
 UserRouter.post(
   "/",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowFullAdmins),
+  filterMiddleware(allowMain),
   UserController.createUser,
 );
-
-// Unrestricted user creation. Be careful.
-// UserRouter.post("/", UserController.createUser);
 
 UserRouter.post("/sign-up", UserController.signUp);
 
@@ -64,18 +59,17 @@ UserRouter.patch(
   "/:idUser",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowFullAdmins),
+  filterMiddleware(allowUsers),
   UserController.updateUser,
-  notFound,
 );
 
 UserRouter.delete(
   "/:idUser",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowFullAdmins),
+  filterMiddleware(allowMain),
+  filterMiddleware(denySelf),
   UserController.deleteUser,
-  notFound,
 );
 
 UserRouter.get(
@@ -118,7 +112,7 @@ UserRouter.delete(
   UserController.deleteAddress,
 );
 
-UserRouter.use("/:id/addresses", notFound);
-UserRouter.use("/", notFound);
+UserRouter.use("/:id/addresses", notFound());
+UserRouter.use("/", notFound());
 
 module.exports = UserRouter;

@@ -60,7 +60,9 @@ const userSchema = new Schema(
       trim: true,
       validate: {
         validator: function (value) {
-          return this.phoneLocale ? validator.isMobilePhone(value, this.phoneLocale, { strictMode: true }) : true;
+          return this.phoneLocale
+            ? validator.isMobilePhone(value, this.phoneLocale, { strictMode: true })
+            : true;
         },
         message: function (props) {
           return `${props.value} is not a valid phone for the specified locale`;
@@ -113,18 +115,18 @@ const userSchema = new Schema(
   { timestamps: true },
 );
 
-userSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: function (doc, ret, options) {
-    delete ret._id;
+// userSchema.set("toJSON", {
+//   virtuals: true,
+//   versionKey: false,
+//   transform: function (doc, ret, options) {
+//     delete ret._id;
 
-    ret.addresses.forEach((address) => {
-      address.id = address._id;
-      delete address._id;
-    });
-  },
-});
+//     ret.addresses.forEach((address) => {
+//       address.id = address._id;
+//       delete address._id;
+//     });
+//   },
+// });
 
 const UserModel = model("user", userSchema);
 

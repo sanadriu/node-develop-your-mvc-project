@@ -14,7 +14,7 @@ async function authMiddleware(req, res, next) {
     const { uid } = authUser;
 
     req.user = {
-      ...req?.user,
+      ...req.user,
       uid,
     };
 

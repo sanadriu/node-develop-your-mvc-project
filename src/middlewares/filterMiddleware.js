@@ -1,5 +1,5 @@
 function filterMiddleware(callback) {
-  return async function (req, res, next) {
+  return function (req, res, next) {
     try {
       if (!callback(req))
         return res.status(403).send({
