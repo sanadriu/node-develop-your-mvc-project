@@ -61,7 +61,9 @@ const userSchema = new Schema(
       validate: {
         validator: function (value) {
           return this.phoneLocale
-            ? validator.isMobilePhone(value, this.phoneLocale, { strictMode: true })
+            ? validator.isMobilePhone(value, this.phoneLocale, {
+                strictMode: true,
+              })
             : true;
         },
         message: function (props) {
@@ -71,11 +73,15 @@ const userSchema = new Schema(
     },
     addresses: [
       {
+        _id: false,
         address: {
           type: String,
           required: [true, "Address is required"],
           trim: true,
-          maxlength: [64, "Address length must not be longer than 64 characters"],
+          maxlength: [
+            64,
+            "Address length must not be longer than 64 characters",
+          ],
         },
         city: {
           type: String,

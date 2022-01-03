@@ -23,7 +23,12 @@ async function getSingleUser(req, res, next) {
   } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
+    }
 
     const result = await UserModel.findById(idUser)
       .select("-__v -createdAt -updatedAt")
@@ -42,10 +47,7 @@ async function getSingleUser(req, res, next) {
 }
 
 async function createUser(req, res, next) {
-  const {
-    params: { idUser },
-    body,
-  } = req;
+  const { body } = req;
 
   try {
     const { __v, createdAt, updatedAt, ...result } = (
@@ -68,7 +70,12 @@ async function updateUser(req, res, next) {
   } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
+    }
 
     const result = await UserModel.findByIdAndUpdate(
       idUser,
@@ -101,7 +108,12 @@ async function deleteUser(req, res, next) {
   } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
+    }
 
     const result = await UserModel.findByIdAndDelete(idUser)
       .select("-__v -createdAt -updatedAt")
@@ -124,7 +136,12 @@ async function getAddresses(req, res, next) {
   } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
+    }
 
     const result = await UserModel.findById(idUser)
       .select(`addresses`)
@@ -150,15 +167,25 @@ async function getSingleAddress(req, res, next) {
   } = req;
 
   try {
-    if (
-      !(Types.ObjectId.isValid(idUser) && Types.ObjectId.isValid(idAddress))
-    ) {
-      return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
     }
+
+    if (isNaN(idAddress) || idAddress < 0) {
+      throw {
+        message: "Wrong address index",
+        status: 400,
+      };
+    }
+
+    const addressPath = `addresses.${idAddress - 1}`;
 
     const result = await UserModel.findOne({
       _id: idUser,
-      addresses: { $elemMatch: { _id: idAddress } },
+      [addressPath]: { $exists: true },
     })
       .select("addresses")
       .lean()
@@ -168,7 +195,7 @@ async function getSingleAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result.addresses.find((address) => address._id == idAddress),
+      data: result.addresses[idAddress - 1],
     });
   } catch (error) {
     next(error);
@@ -182,7 +209,12 @@ async function addAddress(req, res, next) {
   } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
+    }
 
     const result = await UserModel.findByIdAndUpdate(
       idUser,
@@ -218,17 +250,27 @@ async function updateAddress(req, res, next) {
   } = req;
 
   try {
-    if (
-      !(Types.ObjectId.isValid(idUser) && Types.ObjectId.isValid(idAddress))
-    ) {
-      return next();
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
     }
 
+    if (isNaN(idAddress) || idAddress < 0) {
+      throw {
+        message: "Wrong address index",
+        status: 400,
+      };
+    }
+
+    const addressPath = `addresses.${idAddress - 1}`;
+
     const result = await UserModel.findOneAndUpdate(
-      { _id: idUser, "addresses._id": idAddress },
+      { _id: idUser, [addressPath]: { $exists: true } },
       {
         $set: {
-          "addresses.$": body,
+          [addressPath]: body,
         },
       },
       {
@@ -244,7 +286,7 @@ async function updateAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result.addresses.shift(),
+      data: result.addresses[idAddress - 1],
     });
   } catch (error) {
     next(error);
@@ -255,23 +297,42 @@ async function deleteAddress(req, res, next) {
   const { idUser, idAddress } = req.params;
 
   try {
-    const result = await UserModel.findByIdAndUpdate(
-      idUser,
-      {
-        $pull: {
-          addresses: { _id: idAddress },
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-      .select("addresses")
+    if (!Types.ObjectId.isValid(idUser)) {
+      throw {
+        message: "Wrong user ID",
+        status: 400,
+      };
+    }
+
+    if (isNaN(idAddress) || idAddress < 0) {
+      throw {
+        message: "Wrong address index",
+        status: 400,
+      };
+    }
+
+    const addressPath = `addresses.${idAddress - 1}`;
+
+    const result = await UserModel.findOne({
+      _id: idUser,
+      [addressPath]: { $exists: true },
+    })
       .lean()
       .exec();
 
     if (!result) return next();
+
+    UserModel.findByIdAndUpdate(idUser, {
+      $unset: {
+        [addressPath]: "",
+      },
+    });
+
+    UserModel.findByIdAndUpdate(idUser, {
+      $pull: {
+        addresses: null,
+      },
+    });
 
     res.status(200).send({
       success: true,
