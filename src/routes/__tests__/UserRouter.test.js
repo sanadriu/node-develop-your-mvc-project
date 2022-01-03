@@ -95,12 +95,12 @@ describe("User CRUD", () => {
   });
 
   describe("2. Get single user", () => {
-    let id;
+    let idUser;
 
     beforeAll(async () => {
       await UserModel.insertMany(data.users);
 
-      id = (await UserModel.findOne().lean().exec())._id;
+      idUser = (await UserModel.findOne().lean().exec())._id;
     });
 
     afterAll(async () => {
@@ -113,7 +113,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${id}`)
+        .get(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -127,7 +127,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${id}`)
+        .get(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -135,15 +135,15 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("2.3. Allow users with 'customer' role to make the request of itself", async () => {
-      const { uid: token, _id: id } = await UserModel.findOne({
+    test("2.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
         role: "customer",
       })
         .lean()
         .exec();
 
       const res = await request
-        .get(`/users/${id}`)
+        .get(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -151,10 +151,11 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("2.4. Do not allow users with 'customer' role to make the request if it's not itself", async () => {
-      const { _id: id } = await UserModel.findOne({ firstName: "Alice" })
+    test("2.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
         .lean()
         .exec();
+
       const { uid: token } = await UserModel.findOne({
         role: "customer",
         firstName: { $ne: "Alice" },
@@ -163,7 +164,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${id}`)
+        .get(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -173,7 +174,7 @@ describe("User CRUD", () => {
     });
 
     test("2.5. Do not allow unauthenticated users to make the request", async () => {
-      const res = await request.get(`/users/${id}`);
+      const res = await request.get(`/users/${idUser}`);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(401);
@@ -181,13 +182,13 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("2.6 Body 'data' is an object", async () => {
+    test("2.6. Body 'data' is an object", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
       const res = await request
-        .get(`/users/${id}`)
+        .get(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.body.data).toEqual(
@@ -201,7 +202,7 @@ describe("User CRUD", () => {
       );
     });
 
-    test("2.7 Reply with 'not found' if user id does not exist", async () => {
+    test("2.7. Reply with 'not found' if user id does not exist", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -299,7 +300,7 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("3.6 Body 'data' is an object", async () => {
+    test("3.5. Body 'data' is an object", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -340,11 +341,11 @@ describe("User CRUD", () => {
       ],
     };
 
-    let id;
+    let idUser;
 
     beforeEach(async () => {
       await UserModel.insertMany(data.users);
-      id = (await UserModel.findOne().lean().exec())._id;
+      idUser = (await UserModel.findOne().lean().exec())._id;
     });
 
     afterEach(async () => {
@@ -357,7 +358,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${id}`)
+        .patch(`/users/${idUser}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -372,7 +373,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${id}`)
+        .patch(`/users/${idUser}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -381,15 +382,15 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("4.3. Allow users with 'customer' role to make the request of itself", async () => {
-      const { uid: token, _id: id } = await UserModel.findOne({
+    test("4.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
         role: "customer",
       })
         .lean()
         .exec();
 
       const res = await request
-        .patch(`/users/${id}`)
+        .patch(`/users/${idUser}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -398,10 +399,11 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("4.4. Do not allow users with 'customer' role to make the request if it's not itself", async () => {
-      const { _id: id } = await UserModel.findOne({ firstName: "Alice" })
+    test("4.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
         .lean()
         .exec();
+
       const { uid: token } = await UserModel.findOne({
         role: "customer",
         firstName: { $ne: "Alice" },
@@ -410,7 +412,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${id}`)
+        .patch(`/users/${idUser}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -421,7 +423,7 @@ describe("User CRUD", () => {
     });
 
     test("4.5. Do not allow unauthenticated users to make the request", async () => {
-      const res = await request.patch(`/users/${id}`);
+      const res = await request.patch(`/users/${idUser}`);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(401);
@@ -429,13 +431,13 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("4.6 Body 'data' is an object", async () => {
+    test("4.6. Body 'data' is an object", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
       const res = await request
-        .patch(`/users/${id}`)
+        .patch(`/users/${idUser}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -450,7 +452,7 @@ describe("User CRUD", () => {
       );
     });
 
-    test("4.7 Reply with 'not found' if user id does not exist", async () => {
+    test("4.7. Reply with 'not found' if user id does not exist", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -468,11 +470,11 @@ describe("User CRUD", () => {
   });
 
   describe("5. Delete user", () => {
-    let id;
+    let idUser;
 
     beforeEach(async () => {
       await UserModel.insertMany(data.users);
-      id = (await UserModel.findOne().lean().exec())._id;
+      idUser = (await UserModel.findOne().lean().exec())._id;
     });
 
     afterEach(async () => {
@@ -485,7 +487,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${id}`)
+        .delete(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -493,15 +495,15 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("5.2. Allow users with 'main-admin' role to make the request, if they are not themselves", async () => {
-      const { uid: token, _id: id } = await UserModel.findOne({
+    test("5.2. Do not allow users with 'main-admin' role to delete themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
         role: "main-admin",
       })
         .lean()
         .exec();
 
       const res = await request
-        .delete(`/users/${id}`)
+        .delete(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -516,7 +518,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${id}`)
+        .delete(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -531,7 +533,7 @@ describe("User CRUD", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${id}`)
+        .delete(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -541,7 +543,7 @@ describe("User CRUD", () => {
     });
 
     test("5.5. Do not allow unauthenticated users to make the request", async () => {
-      const res = await request.delete(`/users/${id}`);
+      const res = await request.delete(`/users/${idUser}`);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(401);
@@ -549,19 +551,19 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("5.6 Body does not have 'data' property", async () => {
+    test("5.6. Body does not have 'data' property", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
       const res = await request
-        .delete(`/users/${id}`)
+        .delete(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
       expect(res.body).not.toHaveProperty("data");
     });
 
-    test("5.7 Reply with 'not found' if user id does not exist", async () => {
+    test("5.7. Reply with 'not found' if user id does not exist", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -574,6 +576,478 @@ describe("User CRUD", () => {
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
       expect(res.body).toHaveProperty("message", "User not found");
+    });
+  });
+
+  describe("6. Get addresses", () => {
+    let idUser;
+
+    beforeAll(async () => {
+      await UserModel.insertMany(data.users);
+      idUser = (await UserModel.findOne().lean().exec())._id;
+    });
+
+    afterAll(async () => {
+      await UserModel.deleteMany();
+    });
+
+    test("6.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("6.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("6.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
+        role: "customer",
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("6.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
+        .lean()
+        .exec();
+
+      const { uid: token } = await UserModel.findOne({
+        role: "customer",
+        firstName: { $ne: "Alice" },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("6.5. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.get(`/users/${idUser}/addresses`);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("6.6 Body 'data' is an array of addresses", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([
+          {
+            _id: expect.any(String),
+            address: expect.any(String),
+            city: expect.any(String),
+            postalCode: expect.any(String),
+            countryCode: expect.any(String),
+          },
+        ]),
+      );
+    });
+  });
+
+  describe("7. Get single address", () => {
+    let idUser;
+    let idAddress;
+
+    beforeAll(async () => {
+      await UserModel.insertMany(data.users);
+      const user = await UserModel.findOne({ "addresses.0": { $exists: true } })
+        .lean()
+        .exec();
+
+      idUser = user._id;
+      idAddress = user.addresses[0]._id;
+    });
+
+    afterAll(async () => {
+      await UserModel.deleteMany();
+    });
+
+    test("7.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("7.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("7.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
+        role: "customer",
+        "addresses.0": { $exists: true },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("7.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({
+        "addresses.0": { $exists: true },
+        firstName: "Alice",
+      })
+        .lean()
+        .exec();
+
+      const { uid: token } = await UserModel.findOne({
+        role: "customer",
+        firstName: { $ne: "Alice" },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("7.5. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.get(`/users/${idUser}/addresses/${idAddress}`);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("7.6 Body 'data' is an address object", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.body.data).toEqual({
+        _id: expect.any(String),
+        address: expect.any(String),
+        city: expect.any(String),
+        postalCode: expect.any(String),
+        countryCode: expect.any(String),
+      });
+    });
+  });
+
+  describe("8. Add address", () => {
+    const body = {
+      address: "Somewhere",
+      city: "Over the Rainbow",
+      postalCode: "07777",
+      countryCode: "ES",
+    };
+
+    let idUser;
+
+    beforeEach(async () => {
+      await UserModel.insertMany(data.users);
+      idUser = (await UserModel.findOne().lean().exec())._id;
+    });
+
+    afterEach(async () => {
+      await UserModel.deleteMany();
+    });
+
+    test("8.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .post(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("8.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .post(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("8.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
+        role: "customer",
+        "addresses.0": { $exists: true },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .post(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("8.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({
+        "addresses.0": { $exists: true },
+        firstName: "Alice",
+      })
+        .lean()
+        .exec();
+
+      const { uid: token } = await UserModel.findOne({
+        role: "customer",
+        firstName: { $ne: "Alice" },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .post(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("8.5. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.post(`/users/${idUser}/addresses`).send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("8.6. Body 'data' is an address object", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .post(`/users/${idUser}/addresses`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.body.data).toEqual({
+        _id: expect.any(String),
+        ...body,
+      });
+    });
+  });
+
+  describe("9. Update address", () => {
+    const body = {
+      address: "Somewhere",
+      city: "Over the Rainbow",
+      postalCode: "07777",
+      countryCode: "ES",
+    };
+
+    let idUser;
+    let idAddress;
+
+    beforeEach(async () => {
+      await UserModel.insertMany(data.users);
+      const user = await UserModel.findOne({ "addresses.0": { $exists: true } })
+        .lean()
+        .exec();
+
+      idUser = user._id;
+      idAddress = user.addresses[0]._id;
+    });
+
+    afterEach(async () => {
+      await UserModel.deleteMany();
+    });
+
+    test("9.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("9.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("9.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
+        role: "customer",
+        "addresses.0": { $exists: true },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("9.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({
+        "addresses.0": { $exists: true },
+        firstName: "Alice",
+      })
+        .lean()
+        .exec();
+
+      const { uid: token } = await UserModel.findOne({
+        role: "customer",
+        firstName: { $ne: "Alice" },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("9.5. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request
+        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .send(body);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("9.6. Body 'data' is an address object", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .auth(token, { type: "bearer" })
+        .send(body);
+
+      expect(res.body.data).toEqual({
+        _id: expect.any(String),
+        ...body,
+      });
     });
   });
 });

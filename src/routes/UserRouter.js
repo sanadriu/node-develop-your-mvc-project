@@ -43,6 +43,7 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleUser,
+  notFound("User not found"),
 );
 
 UserRouter.post(
@@ -61,6 +62,7 @@ UserRouter.patch(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.updateUser,
+  notFound("User not found"),
 );
 
 UserRouter.delete(
@@ -70,6 +72,7 @@ UserRouter.delete(
   filterMiddleware(allowMain),
   filterMiddleware(denySelf),
   UserController.deleteUser,
+  notFound("User not found"),
 );
 
 UserRouter.get(
@@ -78,6 +81,7 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getAddresses,
+  notFound("User not found"),
 );
 
 UserRouter.get(
@@ -86,6 +90,7 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleAddress,
+  notFound("User or address not found"),
 );
 
 UserRouter.post(
@@ -94,6 +99,7 @@ UserRouter.post(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.addAddress,
+  notFound("User not found"),
 );
 
 UserRouter.patch(
@@ -102,6 +108,7 @@ UserRouter.patch(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.updateAddress,
+  notFound("User or address not found"),
 );
 
 UserRouter.delete(
@@ -110,6 +117,7 @@ UserRouter.delete(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.deleteAddress,
+  notFound("User or address not found"),
 );
 
 UserRouter.use("/:id/addresses", notFound());

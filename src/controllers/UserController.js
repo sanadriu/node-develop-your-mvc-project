@@ -3,7 +3,10 @@ const { UserModel } = require("../models");
 
 async function getUsers(req, res, next) {
   try {
-    const result = await UserModel.find({}).select("-__v -createdAt -updatedAt").lean().exec();
+    const result = await UserModel.find({})
+      .select("-__v -createdAt -updatedAt")
+      .lean()
+      .exec();
 
     res.status(200).send({
       success: true,
@@ -15,42 +18,39 @@ async function getUsers(req, res, next) {
 }
 
 async function getSingleUser(req, res, next) {
-  const { idUser } = req.params;
+  const {
+    params: { idUser },
+  } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
+    if (!Types.ObjectId.isValid(idUser)) return next();
 
     const result = await UserModel.findById(idUser)
       .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
 
-    if (result) {
-      res.status(200).send({
-        success: true,
-        data: result,
-      });
-    } else {
-      res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
+    if (!result) return next();
+
+    res.status(200).send({
+      success: true,
+      data: result,
+    });
   } catch (error) {
     next(error);
   }
 }
 
 async function createUser(req, res, next) {
-  const user = req.body;
+  const {
+    params: { idUser },
+    body,
+  } = req;
 
   try {
-    const { __v, createdAt, updatedAt, ...result } = (await UserModel.create(user)).toJSON();
+    const { __v, createdAt, updatedAt, ...result } = (
+      await UserModel.create(body)
+    ).toJSON();
 
     res.status(201).send({
       success: true,
@@ -62,21 +62,18 @@ async function createUser(req, res, next) {
 }
 
 async function updateUser(req, res, next) {
-  const { idUser } = req.params;
-  const user = req.body;
+  const {
+    params: { idUser },
+    body,
+  } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
+    if (!Types.ObjectId.isValid(idUser)) return next();
 
     const result = await UserModel.findByIdAndUpdate(
       idUser,
       {
-        $set: user,
+        $set: body,
       },
       {
         new: true,
@@ -87,62 +84,34 @@ async function updateUser(req, res, next) {
       .lean()
       .exec();
 
-    if (result) {
-      res.status(200).send({
-        success: true,
-        data: result,
-      });
-    } else {
-      res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
+    if (!result) return next();
+
+    res.status(200).send({
+      success: true,
+      data: result,
+    });
   } catch (error) {
     next(error);
   }
 }
 
 async function deleteUser(req, res, next) {
-  const { idUser } = req.params;
+  const {
+    params: { idUser },
+  } = req;
 
   try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
+    if (!Types.ObjectId.isValid(idUser)) return next();
 
     const result = await UserModel.findByIdAndDelete(idUser)
       .select("-__v -createdAt -updatedAt")
       .lean()
       .exec();
 
-    if (result) {
-      res.status(200).send({
-        success: true,
-      });
-    } else {
-      res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function deleteUsers(req, res, next) {
-  try {
-    const result = await UserModel.deleteMany({});
+    if (!result) return next();
 
     res.status(200).send({
       success: true,
-      data: {
-        count: result.deletedCount,
-      },
     });
   } catch (error) {
     next(error);
@@ -150,34 +119,46 @@ async function deleteUsers(req, res, next) {
 }
 
 async function getAddresses(req, res, next) {
-  const { idUser } = req.params;
+  const {
+    params: { idUser },
+  } = req;
 
   try {
-    const result = await UserModel.findById(idUser).select(`addresses`).lean().exec();
+    if (!Types.ObjectId.isValid(idUser)) return next();
 
-    if (result) {
-      res.status(200).send({
-        success: true,
-        data: result,
-      });
-    } else {
-      res.status(404).send({
-        success: false,
-        message: "User not found",
-      });
-    }
+    const result = await UserModel.findById(idUser)
+      .select(`addresses`)
+      .lean()
+      .exec();
+
+    if (!result) return next();
+
+    const { addresses } = result;
+
+    res.status(200).send({
+      success: true,
+      data: addresses,
+    });
   } catch (error) {
     next(error);
   }
 }
 
 async function getSingleAddress(req, res, next) {
-  const { idUser, idAddress } = req.params;
+  const {
+    params: { idUser, idAddress },
+  } = req;
 
   try {
-    const result = await UserModel.findById({
+    if (
+      !(Types.ObjectId.isValid(idUser) && Types.ObjectId.isValid(idAddress))
+    ) {
+      return next();
+    }
+
+    const result = await UserModel.findOne({
       _id: idUser,
-      "addresses._id": idAddress,
+      addresses: { $elemMatch: { _id: idAddress } },
     })
       .select("addresses")
       .lean()
@@ -195,15 +176,19 @@ async function getSingleAddress(req, res, next) {
 }
 
 async function addAddress(req, res, next) {
-  const { idUser } = req.params;
-  const address = req.body;
+  const {
+    params: { idUser },
+    body,
+  } = req;
 
   try {
+    if (!Types.ObjectId.isValid(idUser)) return next();
+
     const result = await UserModel.findByIdAndUpdate(
       idUser,
       {
         $push: {
-          addresses: address,
+          addresses: body,
         },
       },
       {
@@ -219,7 +204,7 @@ async function addAddress(req, res, next) {
 
     res.status(201).send({
       success: true,
-      data: result.addresses.slice(-1)._id,
+      data: result.addresses.pop(),
     });
   } catch (error) {
     next(error);
@@ -227,15 +212,23 @@ async function addAddress(req, res, next) {
 }
 
 async function updateAddress(req, res, next) {
-  const { idUser, idAddress } = req.params;
-  const address = req.body;
+  const {
+    params: { idUser, idAddress },
+    body,
+  } = req;
 
   try {
+    if (
+      !(Types.ObjectId.isValid(idUser) && Types.ObjectId.isValid(idAddress))
+    ) {
+      return next();
+    }
+
     const result = await UserModel.findOneAndUpdate(
       { _id: idUser, "addresses._id": idAddress },
       {
         $set: {
-          "addresses.$": address,
+          "addresses.$": body,
         },
       },
       {
@@ -251,7 +244,7 @@ async function updateAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result.addresses.find((address) => address._id == idAddress),
+      data: result.addresses.shift(),
     });
   } catch (error) {
     next(error);
@@ -322,7 +315,6 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
-  deleteUsers,
   getAddresses,
   getSingleAddress,
   addAddress,
