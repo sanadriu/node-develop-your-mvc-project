@@ -1,31 +1,13 @@
 const express = require("express");
 
+const { UserController } = require("../controllers");
+const { allowUsers, allowAdmin, allowMain, denySelf } = require("./filters");
 const {
-  notFound,
+  notFoundHandler,
   authMiddleware,
   accessMiddleware,
   filterMiddleware,
 } = require("../middlewares");
-const { UserController } = require("../controllers");
-
-function allowUsers({ user: { role, id }, params: { idUser } }) {
-  return (
-    ["admin", "main-admin"].includes(role) ||
-    (role === "customer" && id === idUser)
-  );
-}
-
-function allowAdmin({ user: { role } }) {
-  return ["admin", "main-admin"].includes(role);
-}
-
-function allowMain({ user: { role } }) {
-  return role === "main-admin";
-}
-
-function denySelf({ user: { role, id }, params: { idUser } }) {
-  return id !== idUser;
-}
 
 const UserRouter = express.Router();
 
@@ -43,7 +25,7 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleUser,
-  notFound("User not found"),
+  notFoundHandler,
 );
 
 UserRouter.post(
@@ -62,7 +44,7 @@ UserRouter.patch(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.updateUser,
-  notFound("User not found"),
+  notFoundHandler,
 );
 
 UserRouter.delete(
@@ -72,7 +54,7 @@ UserRouter.delete(
   filterMiddleware(allowMain),
   filterMiddleware(denySelf),
   UserController.deleteUser,
-  notFound("User not found"),
+  notFoundHandler,
 );
 
 UserRouter.get(
@@ -81,7 +63,7 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getAddresses,
-  notFound("User not found"),
+  notFoundHandler,
 );
 
 UserRouter.get(
@@ -90,7 +72,7 @@ UserRouter.get(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.getSingleAddress,
-  notFound("User or address not found"),
+  notFoundHandler,
 );
 
 UserRouter.post(
@@ -99,7 +81,7 @@ UserRouter.post(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.addAddress,
-  notFound("User not found"),
+  notFoundHandler,
 );
 
 UserRouter.patch(
@@ -108,7 +90,7 @@ UserRouter.patch(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.updateAddress,
-  notFound("User or address not found"),
+  notFoundHandler,
 );
 
 UserRouter.delete(
@@ -117,10 +99,10 @@ UserRouter.delete(
   accessMiddleware,
   filterMiddleware(allowUsers),
   UserController.deleteAddress,
-  notFound("User or address not found"),
+  notFoundHandler,
 );
 
-UserRouter.use("/:id/addresses", notFound());
-UserRouter.use("/", notFound());
+UserRouter.use("/:id/addresses", notFoundHandler);
+UserRouter.use("/", notFoundHandler);
 
 module.exports = UserRouter;

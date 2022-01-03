@@ -7,7 +7,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 
 const { UserRouter, ProductRouter } = require("./routes");
-const { error } = require("./middlewares");
+const { errorHandler } = require("./middlewares");
 
 const app = express();
 
@@ -24,6 +24,6 @@ app.use(parser.json());
 app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
 
-app.use(error);
+app.use(errorHandler);
 
 module.exports = app;

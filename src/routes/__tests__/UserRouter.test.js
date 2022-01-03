@@ -7,7 +7,7 @@ const supertest = require("supertest");
 
 jest.mock("../../middlewares/authMiddleware");
 
-describe("User CRUD", () => {
+describe("User CRUD operations", () => {
   const request = supertest(app);
 
   beforeAll(async () => {
@@ -74,13 +74,14 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("1.5 Successful operation returns an array of users", async () => {
+    test("1.5. Successful operation returns an array of users", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
       const res = await request.get("/users/").auth(token, { type: "bearer" });
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toEqual(
@@ -201,6 +202,7 @@ describe("User CRUD", () => {
         .get(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toEqual(
@@ -250,7 +252,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -311,7 +313,7 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Forbidden");
     });
 
-    test("3.3. Allow users with 'customer' role to make the request", async () => {
+    test("3.3. Do not allow users with 'customer' role to make the request", async () => {
       const { uid: token } = await UserModel.findOne({ role: "customer" })
         .lean()
         .exec();
@@ -346,6 +348,7 @@ describe("User CRUD", () => {
         .auth(token, { type: "bearer" })
         .send(body);
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toMatchObject(body);
@@ -470,6 +473,7 @@ describe("User CRUD", () => {
         .auth(token, { type: "bearer" })
         .send(body);
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toMatchObject(body);
@@ -506,7 +510,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -592,7 +596,7 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("5.6. Successful operation only returns 'success' at true", async () => {
+    test("5.6. Successful operation only returns 'success' as true", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -601,6 +605,7 @@ describe("User CRUD", () => {
         .delete(`/users/${idUser}`)
         .auth(token, { type: "bearer" });
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body).not.toHaveProperty("data");
@@ -635,7 +640,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -735,6 +740,7 @@ describe("User CRUD", () => {
         .get(`/users/${idUser}/addresses`)
         .auth(token, { type: "bearer" });
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toEqual(
@@ -778,7 +784,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -879,7 +885,7 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("7.6 Successful operation returns an address", async () => {
+    test("7.6. Successful operation returns an address", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -888,6 +894,7 @@ describe("User CRUD", () => {
         .get(`/users/${idUser}/addresses/${idAddress}`)
         .auth(token, { type: "bearer" });
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toEqual({
@@ -929,7 +936,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User or address not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
 
     test("7.9. Reply with 'bad request' if the address id is not a positive integer (zero excluded)", async () => {
@@ -963,7 +970,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User or address not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -1079,6 +1086,7 @@ describe("User CRUD", () => {
         .auth(token, { type: "bearer" })
         .send(body);
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toMatchObject(body);
@@ -1117,7 +1125,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -1241,6 +1249,7 @@ describe("User CRUD", () => {
         .auth(token, { type: "bearer" })
         .send(body);
 
+      expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body.data).toMatchObject(body);
@@ -1279,7 +1288,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User or address not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
 
     test("9.9. Reply with 'bad request' if the address id is not a positive integer (zero excluded)", async () => {
@@ -1315,7 +1324,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User or address not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
@@ -1418,7 +1427,7 @@ describe("User CRUD", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("10.6. Successful operation without 'data' property", async () => {
+    test("10.6. Successful operation returns 'success' as true", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -1427,6 +1436,8 @@ describe("User CRUD", () => {
         .delete(`/users/${idUser}/addresses/${idAddress}`)
         .auth(token, { type: "bearer" });
 
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
       expect(res.body).not.toHaveProperty("data");
     });
@@ -1462,7 +1473,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User or address not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
 
     test("10.9. Reply with 'bad request' if the address id is not a positive integer (zero excluded)", async () => {
@@ -1496,7 +1507,7 @@ describe("User CRUD", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "User or address not found");
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 });

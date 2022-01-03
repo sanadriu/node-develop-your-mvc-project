@@ -1,10 +1,8 @@
-function notFound(message = "Resource not found") {
-  return function (req, res, next) {
-    res.status(404).send({
-      success: false,
-      message,
-    });
-  };
+function notFoundHandler(req, res, next) {
+  res.status(404).send({
+    success: false,
+    message: "Not found",
+  });
 }
 
-module.exports = notFound;
+module.exports = notFoundHandler;

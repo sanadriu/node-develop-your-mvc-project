@@ -1,4 +1,4 @@
-function error(err, req, res, next) {
+function errorHandler(err, req, res, next) {
   res.status(err.status || 500).send({
     success: false,
     message: err.message,
@@ -6,4 +6,4 @@ function error(err, req, res, next) {
   });
 }
 
-module.exports = error;
+module.exports = errorHandler;

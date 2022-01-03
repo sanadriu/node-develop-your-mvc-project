@@ -1,16 +1,50 @@
 const express = require("express");
 
-const { notFound } = require("../middlewares");
 const { ProductController } = require("../controllers");
+const { allowAdmin } = require("./filters");
+const {
+  notFoundHandler,
+  authMiddleware,
+  accessMiddleware,
+  filterMiddleware,
+} = require("../middlewares");
 
 const ProductsRouter = express.Router();
 
 ProductsRouter.get("/", ProductController.getProducts);
-ProductsRouter.post("/", ProductController.createProducts);
-ProductsRouter.get("/:idProduct", ProductController.getSingleProduct, notFound);
-ProductsRouter.patch("/:idProduct", ProductController.updateProduct, notFound);
-ProductsRouter.delete("/:idProduct", ProductController.deleteProduct, notFound);
 
-ProductsRouter.use("/", notFound);
+ProductsRouter.get(
+  "/:idProduct",
+  ProductController.getSingleProduct,
+  notFoundHandler,
+);
+
+ProductsRouter.post(
+  "/",
+  authMiddleware,
+  accessMiddleware,
+  filterMiddleware(allowAdmin),
+  ProductController.createProducts,
+);
+
+ProductsRouter.patch(
+  "/:idProduct",
+  authMiddleware,
+  accessMiddleware,
+  filterMiddleware(allowAdmin),
+  ProductController.updateProduct,
+  notFoundHandler,
+);
+
+ProductsRouter.delete(
+  "/:idProduct",
+  authMiddleware,
+  accessMiddleware,
+  filterMiddleware(allowAdmin),
+  ProductController.deleteProduct,
+  notFoundHandler,
+);
+
+ProductsRouter.use("/", notFoundHandler);
 
 module.exports = ProductsRouter;
