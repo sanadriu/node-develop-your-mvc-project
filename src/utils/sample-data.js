@@ -89,7 +89,6 @@ module.exports = {
   ],
   products: [
     {
-      id: 1,
       title: "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
       price: 109.95,
       stock: 3,
@@ -98,7 +97,6 @@ module.exports = {
       images: ["https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg"],
     },
     {
-      id: 2,
       title: "Mens Casual Premium Slim Fit T-Shirts ",
       price: 22.3,
       stock: 5,
@@ -109,7 +107,6 @@ module.exports = {
       ],
     },
     {
-      id: 3,
       title: "Mens Cotton Jacket",
       price: 55.99,
       stock: 7,

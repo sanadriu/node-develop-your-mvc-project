@@ -118,21 +118,8 @@ const userSchema = new Schema(
       },
     ],
   },
-  { timestamps: true },
+  { timestamps: true, versionKey: false },
 );
-
-// userSchema.set("toJSON", {
-//   virtuals: true,
-//   versionKey: false,
-//   transform: function (doc, ret, options) {
-//     delete ret._id;
-
-//     ret.addresses.forEach((address) => {
-//       address.id = address._id;
-//       delete address._id;
-//     });
-//   },
-// });
 
 const UserModel = model("user", userSchema);
 

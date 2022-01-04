@@ -174,7 +174,7 @@ async function getSingleAddress(req, res, next) {
       };
     }
 
-    if (isNaN(idAddress) || idAddress < 0) {
+    if (isNaN(idAddress) || idAddress <= 0) {
       throw {
         message: "Wrong address index",
         status: 400,
@@ -257,7 +257,7 @@ async function updateAddress(req, res, next) {
       };
     }
 
-    if (isNaN(idAddress) || idAddress < 0) {
+    if (isNaN(idAddress) || idAddress <= 0) {
       throw {
         message: "Wrong address index",
         status: 400,
@@ -304,7 +304,7 @@ async function deleteAddress(req, res, next) {
       };
     }
 
-    if (isNaN(idAddress) || idAddress < 0) {
+    if (isNaN(idAddress) || idAddress <= 0) {
       throw {
         message: "Wrong address index",
         status: 400,

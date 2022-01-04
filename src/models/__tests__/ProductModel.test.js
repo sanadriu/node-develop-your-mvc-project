@@ -50,7 +50,10 @@ describe("Product Schema", () => {
         title: ` ${correctProductData.title} `,
       };
 
-      await expect(ProductModel.create(productData)).resolves.toHaveProperty("title", correctProductData.title);
+      await expect(ProductModel.create(productData)).resolves.toHaveProperty(
+        "title",
+        correctProductData.title,
+      );
     });
 
     test("1.3. title max length is 64", async () => {
@@ -65,7 +68,9 @@ describe("Product Schema", () => {
         await ProductModel.create(productData);
       } catch (error) {
         expect(error.errors.title.properties.type).toBe("maxlength");
-        expect(error.errors.title.properties.message).toBe("Title length must not be longer than 64 characters");
+        expect(error.errors.title.properties.message).toBe(
+          "Title length must not be longer than 64 characters",
+        );
       }
     });
   });
@@ -119,6 +124,8 @@ describe("Product Schema", () => {
     });
 
     test("3.2. price must be numeric", async () => {
+      expect.assertions(1);
+
       const productData = {
         ...correctProductData,
         price: "zero",
@@ -127,7 +134,7 @@ describe("Product Schema", () => {
       try {
         await ProductModel.create(productData);
       } catch (error) {
-        expect(error.errors.price.reason.code).toBe("ERR_ASSERTION");
+        expect(error.errors.price.kind).toBe("Number");
       }
     });
 
@@ -143,13 +150,17 @@ describe("Product Schema", () => {
         await ProductModel.create(productData);
       } catch (error) {
         expect(error.errors.price.properties.type).toBe("min");
-        expect(error.errors.price.properties.message).toBe("Price must be greater or equal than 0");
+        expect(error.errors.price.properties.message).toBe(
+          "Price must be greater or equal than 0",
+        );
       }
     });
   });
 
   describe("4. stock:", () => {
     test("4.1. stock has a default value of 0", async () => {
+      expect.assertions(1);
+
       const { stock, ...productData } = correctProductData;
 
       const product = await ProductModel.create(productData);
@@ -158,6 +169,8 @@ describe("Product Schema", () => {
     });
 
     test("4.2. stock must be numeric", async () => {
+      expect.assertions(1);
+
       const productData = {
         ...correctProductData,
         stock: "one",
@@ -166,7 +179,7 @@ describe("Product Schema", () => {
       try {
         await ProductModel.create(productData);
       } catch (error) {
-        expect(error.errors.stock.reason.code).toBe("ERR_ASSERTION");
+        expect(error.errors.stock.kind).toBe("Number");
       }
     });
 
@@ -182,7 +195,9 @@ describe("Product Schema", () => {
         await ProductModel.create(productData);
       } catch (error) {
         expect(error.errors.stock.properties.type).toBe("min");
-        expect(error.errors.stock.properties.message).toBe("Stock must be greater or equal than 0");
+        expect(error.errors.stock.properties.message).toBe(
+          "Stock must be greater or equal than 0",
+        );
       }
     });
   });
@@ -195,7 +210,10 @@ describe("Product Schema", () => {
 
       productData.images[0] = ` ${correctProductData.images[0]} `;
 
-      await expect(ProductModel.create(productData)).resolves.toHaveProperty("images.0", correctProductData.images[0]);
+      await expect(ProductModel.create(productData)).resolves.toHaveProperty(
+        "images.0",
+        correctProductData.images[0],
+      );
     });
 
     test("5.2. image URL is valid", async () => {
@@ -210,7 +228,9 @@ describe("Product Schema", () => {
         product = await ProductModel.create(productData);
       } catch (error) {
         expect(error.errors["images.0"].properties.type).toBe("user defined");
-        expect(error.errors["images.0"].properties.message).toBe(`${url} is not a valid URL for images`);
+        expect(error.errors["images.0"].properties.message).toBe(
+          `${url} is not a valid URL for images`,
+        );
       }
     });
   });

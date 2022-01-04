@@ -2,9 +2,23 @@ const { Types } = require("mongoose");
 const { ProductModel } = require("../models");
 
 async function getProducts(req, res, next) {
+  const num = 10;
+  const {
+    query: { page = 1 },
+  } = req;
+
   try {
+    if (isNaN(page) || page <= 0) {
+      throw {
+        message: "Wrong address index",
+        status: 400,
+      };
+    }
+
     const result = await ProductModel.find({})
       .select("-__v -createdAt -updatedAt")
+      .skip((page - 1) * num)
+      .limit(num)
       .exec();
 
     res.status(200).send({
