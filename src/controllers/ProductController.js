@@ -2,7 +2,7 @@ const { Types } = require("mongoose");
 const { ProductModel } = require("../models");
 
 async function getProducts(req, res, next) {
-  const num = 10;
+  const limit = 10;
   const {
     query: { page = 1 },
   } = req;
@@ -10,15 +10,15 @@ async function getProducts(req, res, next) {
   try {
     if (isNaN(page) || page <= 0) {
       throw {
-        message: "Wrong address index",
+        message: "Wrong page number",
         status: 400,
       };
     }
 
     const result = await ProductModel.find({})
       .select("-__v -createdAt -updatedAt")
-      .skip((page - 1) * num)
-      .limit(num)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .exec();
 
     res.status(200).send({
@@ -59,7 +59,7 @@ async function getSingleProduct(req, res, next) {
   }
 }
 
-async function createProducts(req, res, next) {
+async function createProduct(req, res, next) {
   const { body } = req;
 
   try {
@@ -69,8 +69,8 @@ async function createProducts(req, res, next) {
       success: true,
       data: result,
     });
-  } catch (erroror) {
-    next(erroror);
+  } catch (error) {
+    next(error);
   }
 }
 
@@ -142,7 +142,7 @@ async function deleteProduct(req, res, next) {
 
 module.exports = {
   getProducts: getProducts,
-  createProducts: createProducts,
+  createProduct: createProduct,
   getSingleProduct: getSingleProduct,
   updateProduct: updateProduct,
   deleteProduct: deleteProduct,

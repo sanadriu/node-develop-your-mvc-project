@@ -24,7 +24,7 @@ ProductsRouter.post(
   authMiddleware,
   accessMiddleware,
   filterMiddleware(allowAdmin),
-  ProductController.createProducts,
+  ProductController.createProduct,
 );
 
 ProductsRouter.patch(

@@ -1,10 +1,10 @@
-function filterMiddleware(callback) {
+function filterMiddleware(callback, message = "Forbidden") {
   return function (req, res, next) {
     try {
       if (!callback(req))
         return res.status(403).send({
           success: false,
-          message: "Forbidden",
+          message,
         });
 
       next();
