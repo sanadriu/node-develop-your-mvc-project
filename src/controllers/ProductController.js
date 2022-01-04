@@ -37,10 +37,10 @@ async function getSingleProduct(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idProduct)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong product ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await ProductModel.findById(idProduct)
@@ -82,10 +82,10 @@ async function updateProduct(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idProduct)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong product ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await ProductModel.findByIdAndUpdate(
@@ -119,10 +119,10 @@ async function deleteProduct(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idProduct)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong product ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await ProductModel.findByIdAndDelete(idProduct)

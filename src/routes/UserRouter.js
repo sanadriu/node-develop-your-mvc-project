@@ -1,12 +1,14 @@
 const express = require("express");
 
 const { UserController } = require("../controllers");
-const { allowUsers, allowAdmin, allowMain, denySelf } = require("./filters");
+const { allowAdmin, allowMain, denySelf, allowSelf } = require("./filters");
 const {
   notFoundHandler,
   authMiddleware,
   accessMiddleware,
   filterMiddleware,
+  filterEveryMiddleware,
+  filterSomeMiddleware,
 } = require("../middlewares");
 
 const UserRouter = express.Router();
@@ -23,7 +25,7 @@ UserRouter.get(
   "/:idUser",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.getSingleUser,
   notFoundHandler,
 );
@@ -42,7 +44,7 @@ UserRouter.patch(
   "/:idUser",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.updateUser,
   notFoundHandler,
 );
@@ -51,8 +53,7 @@ UserRouter.delete(
   "/:idUser",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowMain),
-  filterMiddleware(denySelf),
+  filterEveryMiddleware([allowMain, denySelf]),
   UserController.deleteUser,
   notFoundHandler,
 );
@@ -61,7 +62,7 @@ UserRouter.get(
   "/:idUser/addresses",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.getAddresses,
   notFoundHandler,
 );
@@ -70,7 +71,7 @@ UserRouter.get(
   "/:idUser/addresses/:idAddress",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.getSingleAddress,
   notFoundHandler,
 );
@@ -79,7 +80,7 @@ UserRouter.post(
   "/:idUser/addresses/",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.addAddress,
   notFoundHandler,
 );
@@ -88,7 +89,7 @@ UserRouter.patch(
   "/:idUser/addresses/:idAddress",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.updateAddress,
   notFoundHandler,
 );
@@ -97,7 +98,7 @@ UserRouter.delete(
   "/:idUser/addresses/:idAddress",
   authMiddleware,
   accessMiddleware,
-  filterMiddleware(allowUsers),
+  filterSomeMiddleware([allowAdmin, allowSelf]),
   UserController.deleteAddress,
   notFoundHandler,
 );

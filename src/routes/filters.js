@@ -1,24 +1,60 @@
-function allowUsers({ user: { role, id }, params: { idUser } }) {
-  return ["admin", "main-admin"].includes(role) || id === idUser;
-}
+function allowUsers(req) {
+  const {
+    user: { role },
+  } = req;
 
-function allowUsersV2({ user: { role } }) {
   return ["admin", "main-admin", "customer"].includes(role);
 }
 
-function allowAdmin({ user: { role } }) {
+function allowAdmin(req) {
+  const {
+    user: { role },
+  } = req;
+
   return ["admin", "main-admin"].includes(role);
 }
 
-function allowMain({ user: { role } }) {
+function allowMain(req) {
+  const {
+    user: { role },
+  } = req;
+
   return role === "main-admin";
 }
 
-function allowSelf({ user: { id }, params: { idUser } }) {
+function allowSelf(req) {
+  const {
+    user: { id },
+    params: { idUser },
+  } = req;
+
   return id === idUser;
 }
 
-function denySelf({ user: { id }, params: { idUser } }) {
+function allowSelfInQuery(req) {
+  const {
+    user: { id },
+    query: { user: idUser },
+  } = req;
+
+  return id === idUser;
+}
+
+function denySelf(req) {
+  const {
+    user: { id },
+    params: { idUser },
+  } = req;
+
+  return id !== idUser;
+}
+
+function denySelfInQuery(req) {
+  const {
+    user: { id },
+    query: { user: idUser },
+  } = req;
+
   return id !== idUser;
 }
 
@@ -27,5 +63,7 @@ module.exports = {
   allowAdmin,
   allowMain,
   allowSelf,
+  allowSelfInQuery,
   denySelf,
+  denySelfInQuery,
 };

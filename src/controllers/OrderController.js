@@ -3,7 +3,7 @@ const { OrderModel } = require("../models");
 
 async function getOrders(req, res, next) {
   const {
-    query: { page = 1, idCustomer = null },
+    query: { page = 1 },
   } = req;
 
   const limit = 10;
@@ -11,26 +11,65 @@ async function getOrders(req, res, next) {
 
   try {
     if (isNaN(page) || page <= 0) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong page number",
-        status: 400,
-      };
+      });
     }
 
-    if (idCustomer !== null && !Types.ObjectId.isValid(idCustomer)) {
-      throw {
-        message: "Wrong customer ID",
-        status: 400,
-      };
-    }
-
-    const count = await OrderModel.countDocuments(
-      idCustomer && { customer: idCustomer },
-    );
+    const count = await OrderModel.countDocuments();
 
     if (start > count) return next();
 
-    const result = await OrderModel.find(idCustomer && { customer: idCustomer })
+    const result = await OrderModel.find()
+      .select("-__v updatedAt")
+      .skip(start)
+      .limit(limit)
+      .lean()
+      .exec();
+
+    res.status(200).send({
+      success: true,
+      data: result,
+      currentPage: page,
+      lastPage: Math.floor(count - 1 / limit) + 1,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getUserOrders(req, res, next) {
+  const {
+    params: { idUser },
+    query: { page = 1 },
+  } = req;
+
+  if (req.query.customer) return next();
+
+  const limit = 10;
+  const start = (page - 1) * limit;
+
+  try {
+    if (isNaN(page) || page <= 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong page number",
+      });
+    }
+
+    if (!Types.ObjectId.isValid(idUser)) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong customer ID",
+      });
+    }
+
+    const count = await OrderModel.countDocuments({ customer: idUser });
+
+    if (start > count) return next();
+
+    const result = await OrderModel.find({ customer: idUser })
       .select("-__v updatedAt")
       .skip(start)
       .limit(limit)
@@ -55,10 +94,10 @@ async function getSingleOrder(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idOrder)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong order ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await OrderModel.findById(idOrder)
@@ -81,13 +120,6 @@ async function createOrder(req, res, next) {
   const { body } = req;
 
   try {
-    if (!req.user?.id) {
-      throw {
-        message: "Forbidden: User must be logged in to specify the customer",
-        status: 403,
-      };
-    }
-
     const result = await OrderModel.create({ ...body, customer: req.user.id });
 
     res.status(201).send({

@@ -1,8 +1,7 @@
 function errorHandler(err, req, res, next) {
-  res.status(err.status || 500).send({
+  res.status(500).send({
     success: false,
-    message: err.message,
-    code: err.code,
+    message: "Server Error",
   });
 }
 

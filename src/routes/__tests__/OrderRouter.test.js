@@ -7,7 +7,7 @@ const supertest = require("supertest");
 
 jest.mock("../../middlewares/authMiddleware");
 
-describe.skip("Order CRUD operations", () => {
+describe("order-crud-operations", () => {
   const request = supertest(app);
 
   beforeAll(async () => {
@@ -34,34 +34,32 @@ describe.skip("Order CRUD operations", () => {
       await ProductModel.deleteMany();
     });
 
-    test("1.1. Allow users with 'customer' role to make the request", async () => {
-      const { uid: token } = UserModel.findOne({ role: "customer" })
+    test("1.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
-      const res = await request
-        .get("/products")
-        .auth(token, { type: "bearer" });
+      const res = await request.get("/orders").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
-      expect(res.body.data).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            _id: expect.any(String),
-            title: expect.any(String),
-            price: expect.any(Number),
-            stock: expect.any(Number),
-            description: expect.any(String),
-            images: expect.arrayContaining([expect.any(String)]),
-          }),
-        ]),
-      );
     });
 
-    test("1.6. Successful operation returns an array of orders", async () => {
-      const res = await request.get("/products");
+    test("1.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = UserModel.findOne({ role: "admin" }).lean().exec();
+
+      const res = await request.get("/orders").auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("1.2. Successful operation returns an array of orders", async () => {
+      const { uid: token } = UserModel.findOne().lean().exec();
+
+      const res = await request.get("/orders").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -70,11 +68,21 @@ describe.skip("Order CRUD operations", () => {
         expect.arrayContaining([
           expect.objectContaining({
             _id: expect.any(String),
-            title: expect.any(String),
-            price: expect.any(Number),
-            stock: expect.any(Number),
-            description: expect.any(String),
-            images: expect.arrayContaining([expect.any(String)]),
+            customer: expect.any(String),
+            shippingCost: expect.any(Number),
+            shippingAddress: {
+              address: expect.any(String),
+              city: expect.any(String),
+              postalCode: expect.any(String),
+              countryCode: expect.any(String),
+            },
+            products: expect.arrayContaining([
+              {
+                product: expect.any(String),
+                price: expect.any(Number),
+                units: expect.any(Number),
+              },
+            ]),
           }),
         ]),
       );

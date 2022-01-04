@@ -24,10 +24,10 @@ async function getSingleUser(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await UserModel.findById(idUser)
@@ -71,10 +71,10 @@ async function updateUser(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await UserModel.findByIdAndUpdate(
@@ -109,10 +109,10 @@ async function deleteUser(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await UserModel.findByIdAndDelete(idUser)
@@ -137,10 +137,10 @@ async function getAddresses(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await UserModel.findById(idUser)
@@ -168,17 +168,17 @@ async function getSingleAddress(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     if (isNaN(idAddress) || idAddress <= 0) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong address index",
-        status: 400,
-      };
+      });
     }
 
     const addressPath = `addresses.${idAddress - 1}`;
@@ -210,10 +210,10 @@ async function addAddress(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     const result = await UserModel.findByIdAndUpdate(
@@ -251,17 +251,17 @@ async function updateAddress(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     if (isNaN(idAddress) || idAddress <= 0) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong address index",
-        status: 400,
-      };
+      });
     }
 
     const addressPath = `addresses.${idAddress - 1}`;
@@ -298,17 +298,17 @@ async function deleteAddress(req, res, next) {
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong user ID",
-        status: 400,
-      };
+      });
     }
 
     if (isNaN(idAddress) || idAddress <= 0) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong address index",
-        status: 400,
-      };
+      });
     }
 
     const addressPath = `addresses.${idAddress - 1}`;

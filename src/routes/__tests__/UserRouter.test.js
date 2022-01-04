@@ -7,7 +7,7 @@ const supertest = require("supertest");
 
 jest.mock("../../middlewares/authMiddleware");
 
-describe("User CRUD operations", () => {
+describe("user-crud-operations", () => {
   const request = supertest(app);
 
   beforeAll(async () => {
