@@ -96,7 +96,7 @@ describe("order-crud-operations", () => {
         expect.arrayContaining([
           expect.objectContaining({
             _id: expect.any(String),
-            idUser: expect.any(String),
+            user: expect.any(String),
             shippingCost: expect.any(Number),
             shippingAddress: {
               address: expect.any(String),
@@ -106,7 +106,7 @@ describe("order-crud-operations", () => {
             },
             products: expect.arrayContaining([
               {
-                idProduct: expect.any(String),
+                product: expect.any(String),
                 price: expect.any(Number),
                 units: expect.any(Number),
               },
@@ -243,7 +243,7 @@ describe("order-crud-operations", () => {
       expect(res.body.data).toEqual(
         expect.objectContaining({
           _id: expect.any(String),
-          idUser: expect.any(String),
+          user: expect.any(String),
           shippingCost: expect.any(Number),
           shippingAddress: {
             address: expect.any(String),
@@ -253,7 +253,7 @@ describe("order-crud-operations", () => {
           },
           products: expect.arrayContaining([
             {
-              idProduct: expect.any(String),
+              product: expect.any(String),
               price: expect.any(Number),
               units: expect.any(Number),
             },
@@ -309,7 +309,7 @@ describe("order-crud-operations", () => {
       );
 
       body = {
-        idUser: idUser,
+        user: idUser,
         shippingCost: 15,
         shippingAddress: {
           address: "Le Baguette, 42",
@@ -319,12 +319,12 @@ describe("order-crud-operations", () => {
         },
         products: [
           {
-            idProduct: idProducts[1],
+            product: idProducts[1],
             price: 109.95,
             units: 1,
           },
           {
-            idProduct: idProducts[2],
+            product: idProducts[2],
             price: 55.99,
             units: 9,
           },
@@ -409,7 +409,7 @@ describe("order-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("success", true);
-      expect(res.body.data).toMatchObject({ ...body, idUser });
+      expect(res.body.data).toMatchObject({ ...body, user: idUser });
     });
   });
 });

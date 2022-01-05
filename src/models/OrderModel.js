@@ -3,7 +3,7 @@ const validator = require("validator");
 
 const orderSchema = new Schema(
   {
-    idUser: {
+    user: {
       type: Schema.Types.ObjectId,
       ref: "user",
       required: [true, "User ID is required"],
@@ -59,7 +59,7 @@ const orderSchema = new Schema(
     products: [
       {
         _id: false,
-        idProduct: {
+        product: {
           type: Schema.Types.ObjectId,
           ref: "product",
           required: [true, "Product must include its correspondent ID"],

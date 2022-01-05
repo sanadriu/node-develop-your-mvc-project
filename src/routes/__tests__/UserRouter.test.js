@@ -1567,7 +1567,7 @@ describe("user-crud-operations", () => {
       await ProductModel.insertMany(data.products);
       await OrderModel.insertMany(await data.orders());
 
-      idUser = (await OrderModel.findOne().lean().exec()).idUser;
+      idUser = (await OrderModel.findOne().lean().exec()).user;
     });
 
     afterAll(async () => {
@@ -1669,7 +1669,7 @@ describe("user-crud-operations", () => {
         expect.arrayContaining([
           expect.objectContaining({
             _id: expect.any(String),
-            idUser: expect.any(String),
+            user: expect.any(String),
             shippingCost: expect.any(Number),
             shippingAddress: {
               address: expect.any(String),
@@ -1679,7 +1679,7 @@ describe("user-crud-operations", () => {
             },
             products: expect.arrayContaining([
               {
-                idProduct: expect.any(String),
+                product: expect.any(String),
                 price: expect.any(Number),
                 units: expect.any(Number),
               },
@@ -1723,22 +1723,7 @@ describe("user-crud-operations", () => {
       expect(res.body).toHaveProperty("message", "Not found");
     });
 
-    test("11.9. Reply with 'not found' if the specified page does not exist", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
-
-      const res = await request
-        .get(`/users/${idUser}/orders?page=1000`)
-        .auth(token, { type: "bearer" });
-
-      expect(res.headers["content-type"]).toMatch("application/json");
-      expect(res.status).toBe(404);
-      expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "Not found");
-    });
-
-    test("1.10. Reply with 'bad request' if the specified page is not a number", async () => {
+    test("1.9. Reply with 'bad request' if the specified page is not a number", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -1751,6 +1736,21 @@ describe("user-crud-operations", () => {
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty("success", false);
       expect(res.body).toHaveProperty("message", "Wrong page number");
+    });
+
+    test("11.10. Reply with 'not found' if the specified page does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders?page=1000`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
     });
 
     test("11.11. Successful operation if specified page exists", async () => {
@@ -1779,7 +1779,7 @@ describe("user-crud-operations", () => {
       await ProductModel.insertMany(data.products);
       await OrderModel.insertMany(await data.orders());
 
-      idUser = (await OrderModel.findOne().lean().exec()).idUser;
+      idUser = (await OrderModel.findOne().lean().exec()).user;
       numOrder = 1;
     });
 
@@ -1819,10 +1819,10 @@ describe("user-crud-operations", () => {
 
     test("12.3. Allow users with 'customer' role to make the request of themselves", async () => {
       const {
-        idUser: { _id: idUser, uid: token },
+        user: { _id: idUser, uid: token },
       } = await OrderModel.findOne()
         .populate({
-          path: "idUser",
+          path: "user",
           select: "uid _id",
           match: { role: "customer" },
         })
@@ -1840,10 +1840,10 @@ describe("user-crud-operations", () => {
 
     test("12.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
       const {
-        idUser: { _id: idUser },
+        user: { _id: idUser },
       } = await OrderModel.findOne()
         .populate({
-          path: "idUser",
+          path: "user",
           select: "uid _id",
           match: { firstName: "Alice" },
         })
@@ -1891,7 +1891,7 @@ describe("user-crud-operations", () => {
       expect(res.body.data).toEqual(
         expect.objectContaining({
           _id: expect.any(String),
-          idUser: expect.any(String),
+          user: expect.any(String),
           shippingCost: expect.any(Number),
           shippingAddress: {
             address: expect.any(String),
@@ -1901,7 +1901,7 @@ describe("user-crud-operations", () => {
           },
           products: expect.arrayContaining([
             {
-              idProduct: expect.any(String),
+              product: expect.any(String),
               price: expect.any(Number),
               units: expect.any(Number),
             },

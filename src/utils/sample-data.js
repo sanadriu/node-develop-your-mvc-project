@@ -134,7 +134,7 @@ const orders = async () => {
 
   return [
     {
-      idUser: idUsers[0],
+      user: idUsers[0],
       shippingCost: 5,
       shippingAddress: {
         address: "False Street, 123",
@@ -144,19 +144,19 @@ const orders = async () => {
       },
       products: [
         {
-          idProduct: idProducts[0],
+          product: idProducts[0],
           price: 109.95,
           units: 1,
         },
         {
-          idProduct: idProducts[2],
+          product: idProducts[2],
           price: 55.99,
           units: 2,
         },
       ],
     },
     {
-      idUser: idUsers[1],
+      user: idUsers[1],
       shippingCost: 10,
       shippingAddress: {
         address: "Le Baguette, 42",
@@ -166,19 +166,19 @@ const orders = async () => {
       },
       products: [
         {
-          idProduct: idProducts[0],
+          product: idProducts[0],
           price: 109.95,
           units: 3,
         },
         {
-          idProduct: idProducts[1],
+          product: idProducts[1],
           price: 22.3,
           units: 4,
         },
       ],
     },
     {
-      idUser: idUsers[2],
+      user: idUsers[2],
       shippingCost: 15,
       shippingAddress: {
         address: "Le Baguette, 42",
@@ -188,12 +188,12 @@ const orders = async () => {
       },
       products: [
         {
-          idProduct: idProducts[1],
+          product: idProducts[1],
           price: 109.95,
           units: 3,
         },
         {
-          idProduct: idProducts[2],
+          product: idProducts[2],
           price: 55.99,
           units: 1,
         },

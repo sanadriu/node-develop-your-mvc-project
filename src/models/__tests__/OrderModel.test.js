@@ -24,7 +24,7 @@ describe("Order Schema", () => {
     );
 
     correctOrderData = {
-      idUser,
+      user: idUser,
       shippingCost: 5,
       shippingAddress: {
         address: "False Street, 123",
@@ -34,12 +34,12 @@ describe("Order Schema", () => {
       },
       products: [
         {
-          idProduct: idProducts[0],
+          product: idProducts[0],
           price: 109.95,
           units: 1,
         },
         {
-          idProduct: idProducts[1],
+          product: idProducts[1],
           price: 22.3,
           units: 2,
         },
@@ -62,13 +62,13 @@ describe("Order Schema", () => {
     test("1.1. user ID is required", async () => {
       expect.assertions(2);
 
-      const { idUser, ...orderData } = correctOrderData;
+      const { user, ...orderData } = correctOrderData;
 
       try {
         await OrderModel.create(orderData);
       } catch (error) {
-        expect(error.errors.idUser.properties.type).toBe("required");
-        expect(error.errors.idUser.properties.message).toBe(
+        expect(error.errors.user.properties.type).toBe("required");
+        expect(error.errors.user.properties.message).toBe(
           "User ID is required",
         );
       }
@@ -77,13 +77,13 @@ describe("Order Schema", () => {
     test("1.2. user ID must be of type ObjectId", async () => {
       expect.assertions(1);
 
-      const { idUser, ...orderData } = correctOrderData;
-      orderData.idUser = "foo";
+      const { user, ...orderData } = correctOrderData;
+      orderData.user = "foo";
 
       try {
         await OrderModel.create(orderData);
       } catch (error) {
-        expect(error.errors.idUser.kind).toBe("ObjectId");
+        expect(error.errors.user.kind).toBe("ObjectId");
       }
     });
   });
@@ -342,17 +342,17 @@ describe("Order Schema", () => {
           expect.assertions(2);
 
           const orderData = deepClone(correctOrderData);
-          delete orderData.products[0].idProduct;
+          delete orderData.products[0].product;
 
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.idProduct"].properties.type).toBe(
+            expect(error.errors["products.0.product"].properties.type).toBe(
               "required",
             );
-            expect(
-              error.errors["products.0.idProduct"].properties.message,
-            ).toBe("Product must include its correspondent ID");
+            expect(error.errors["products.0.product"].properties.message).toBe(
+              "Product must include its correspondent ID",
+            );
           }
         });
 
@@ -360,12 +360,12 @@ describe("Order Schema", () => {
           expect.assertions(1);
 
           const orderData = deepClone(correctOrderData);
-          orderData.products[0].idProduct = "foo";
+          orderData.products[0].product = "foo";
 
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.idProduct"].kind).toBe("ObjectId");
+            expect(error.errors["products.0.product"].kind).toBe("ObjectId");
           }
         });
       });
