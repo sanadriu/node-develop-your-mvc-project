@@ -45,6 +45,6 @@ const productSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-const ProductModel = model("products", productSchema);
+const ProductModel = model("product", productSchema);
 
 module.exports = ProductModel;

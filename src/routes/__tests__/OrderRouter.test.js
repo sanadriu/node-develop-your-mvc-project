@@ -94,9 +94,14 @@ describe("order-crud-operations", () => {
       expect(res.body).toHaveProperty("lastPage", expect.any(Number));
       expect(res.body.data).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({
+          {
             _id: expect.any(String),
-            user: expect.any(String),
+            user: {
+              _id: expect.any(String),
+              firstName: expect.any(String),
+              lastName: expect.any(String),
+              email: expect.any(String),
+            },
             shippingCost: expect.any(Number),
             shippingAddress: {
               address: expect.any(String),
@@ -106,12 +111,17 @@ describe("order-crud-operations", () => {
             },
             products: expect.arrayContaining([
               {
-                product: expect.any(String),
+                product: expect.objectContaining({
+                  _id: expect.any(String),
+                  title: expect.any(String),
+                  images: expect.arrayContaining([expect.any(String)]),
+                }),
                 price: expect.any(Number),
                 units: expect.any(Number),
               },
             ]),
-          }),
+            createdAt: expect.any(String),
+          },
         ]),
       );
     });
@@ -240,26 +250,34 @@ describe("order-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
-      expect(res.body.data).toEqual(
-        expect.objectContaining({
+      expect(res.body.data).toEqual({
+        _id: expect.any(String),
+        user: {
           _id: expect.any(String),
-          user: expect.any(String),
-          shippingCost: expect.any(Number),
-          shippingAddress: {
-            address: expect.any(String),
-            city: expect.any(String),
-            postalCode: expect.any(String),
-            countryCode: expect.any(String),
+          firstName: expect.any(String),
+          lastName: expect.any(String),
+          email: expect.any(String),
+        },
+        shippingCost: expect.any(Number),
+        shippingAddress: {
+          address: expect.any(String),
+          city: expect.any(String),
+          postalCode: expect.any(String),
+          countryCode: expect.any(String),
+        },
+        products: expect.arrayContaining([
+          {
+            product: expect.objectContaining({
+              _id: expect.any(String),
+              title: expect.any(String),
+              images: expect.arrayContaining([expect.any(String)]),
+            }),
+            price: expect.any(Number),
+            units: expect.any(Number),
           },
-          products: expect.arrayContaining([
-            {
-              product: expect.any(String),
-              price: expect.any(Number),
-              units: expect.any(Number),
-            },
-          ]),
-        }),
-      );
+        ]),
+        createdAt: expect.any(String),
+      });
     });
 
     test("2.6. Reply with 'bad request' if the id is invalid", async () => {

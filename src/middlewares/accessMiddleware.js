@@ -3,27 +3,29 @@ const { UserModel } = require("../models");
 async function accessMiddleware(req, res, next) {
   try {
     if (!req.user?.uid) {
-      return res.status(403).send({
-        success: false,
-        message: "Forbidden: Authentication required",
-      });
+      throw new Error(
+        "User UID must be embedded in the request. Request must be processed previously by 'AuthMiddleware'.",
+      );
     }
 
     const { uid } = req.user;
 
-    const result = await UserModel.findOne({ uid }).select("_id role").lean().exec();
+    const result = await UserModel.findOne({ uid })
+      .select("_id role")
+      .lean()
+      .exec();
 
     if (!result)
-      return res.status(403).send({
+      return res.status(401).send({
         success: false,
-        message: "Forbidden: Unregistered user",
+        message: "Not authorized",
       });
 
-    const { role, _id } = result;
+    const { role, _id: id } = result;
 
     req.user = {
       ...req.user,
-      id: _id.toString(),
+      id: id.toString(),
       role,
     };
 

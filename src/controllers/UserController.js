@@ -397,7 +397,8 @@ async function getOrders(req, res, next) {
     if (start > count) return next();
 
     const result = await OrderModel.find({ idUser })
-      .select("-updatedAt")
+      .select("-updatedAt -user")
+      .populate("products.product", "title description images")
       .skip(start)
       .limit(limit)
       .lean()
@@ -442,7 +443,11 @@ async function getSingleOrder(req, res, next) {
       idUser,
     })
       .skip(numOrder - 1)
-      .select("-updatedAt")
+      .select("-updatedAt -user")
+      .populate({
+        path: "products",
+        populate: { path: "product", select: "title description images" },
+      })
       .lean()
       .exec();
 

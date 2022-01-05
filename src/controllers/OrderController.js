@@ -23,6 +23,8 @@ async function getOrders(req, res, next) {
 
     const result = await OrderModel.find()
       .select("-updatedAt")
+      .populate("products.product", "title description images")
+      .populate("user", "firstName lastName email")
       .skip(start)
       .limit(limit)
       .lean()
@@ -54,6 +56,8 @@ async function getSingleOrder(req, res, next) {
 
     const result = await OrderModel.findById(idOrder)
       .select("-updatedAt")
+      .populate("products.product", "title description images")
+      .populate("user", "firstName lastName email")
       .lean()
       .exec();
 
@@ -72,6 +76,12 @@ async function createOrder(req, res, next) {
   const { body } = req;
 
   try {
+    if (!req.user?.id) {
+      throw new Error(
+        "User ID must be embedded in the request. Request must be processed previously by 'AuthMiddleware' and 'AccessMiddleware'.",
+      );
+    }
+
     const { updatedAt, ...result } = (
       await OrderModel.create({
         ...body,
