@@ -6,7 +6,7 @@ const parser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const { UserRouter, ProductRouter } = require("./routes");
+const { UserRouter, ProductRouter, OrderRouter } = require("./routes");
 const { errorHandler } = require("./middlewares");
 
 const app = express();
@@ -23,6 +23,7 @@ app.use(parser.json());
 
 app.use("/products", ProductRouter);
 app.use("/users", UserRouter);
+app.use("/orders", OrderRouter);
 
 app.use(errorHandler);
 

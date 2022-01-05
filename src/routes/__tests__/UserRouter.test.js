@@ -790,7 +790,7 @@ describe("user-crud-operations", () => {
 
   describe("7. Get single address", () => {
     let idUser;
-    let idAddress;
+    let numAddress;
 
     beforeAll(async () => {
       await UserModel.insertMany(data.users);
@@ -799,7 +799,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       idUser = user._id;
-      idAddress = 1;
+      numAddress = 1;
     });
 
     afterAll(async () => {
@@ -812,7 +812,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -826,7 +826,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -843,7 +843,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -867,7 +867,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -877,7 +877,7 @@ describe("user-crud-operations", () => {
     });
 
     test("7.5. Do not allow unauthenticated users to make the request", async () => {
-      const res = await request.get(`/users/${idUser}/addresses/${idAddress}`);
+      const res = await request.get(`/users/${idUser}/addresses/${numAddress}`);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(401);
@@ -891,7 +891,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -913,7 +913,7 @@ describe("user-crud-operations", () => {
       const idUser = "foo";
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -930,7 +930,7 @@ describe("user-crud-operations", () => {
       const idUser = new Types.ObjectId().toString();
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -944,10 +944,10 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const idAddress = -1;
+      const numAddress = -1;
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -961,10 +961,10 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const idAddress = 10;
+      const numAddress = 10;
 
       const res = await request
-        .get(`/users/${idUser}/addresses/${idAddress}`)
+        .get(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1138,7 +1138,7 @@ describe("user-crud-operations", () => {
     };
 
     let idUser;
-    let idAddress;
+    let numAddress;
 
     beforeEach(async () => {
       await UserModel.insertMany(data.users);
@@ -1147,7 +1147,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       idUser = user._id;
-      idAddress = 1;
+      numAddress = 1;
     });
 
     afterEach(async () => {
@@ -1160,7 +1160,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1175,7 +1175,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1193,7 +1193,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1218,7 +1218,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1230,7 +1230,7 @@ describe("user-crud-operations", () => {
 
     test("9.5. Do not allow unauthenticated users to make the request", async () => {
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1245,7 +1245,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1263,7 +1263,7 @@ describe("user-crud-operations", () => {
       const idUser = "foo";
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1281,7 +1281,7 @@ describe("user-crud-operations", () => {
       const idUser = new Types.ObjectId().toString();
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1296,10 +1296,10 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const idAddress = -1;
+      const numAddress = -1;
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1314,10 +1314,10 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const idAddress = 10;
+      const numAddress = 10;
 
       const res = await request
-        .patch(`/users/${idUser}/addresses/${idAddress}`)
+        .patch(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -1330,7 +1330,7 @@ describe("user-crud-operations", () => {
 
   describe("10. Delete address", () => {
     let idUser;
-    let idAddress;
+    let numAddress;
 
     beforeEach(async () => {
       await UserModel.insertMany(data.users);
@@ -1339,7 +1339,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       idUser = user._id;
-      idAddress = 1;
+      numAddress = 1;
     });
 
     afterEach(async () => {
@@ -1352,7 +1352,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1366,7 +1366,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1383,7 +1383,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1407,7 +1407,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1418,7 +1418,7 @@ describe("user-crud-operations", () => {
 
     test("10.5. Do not allow unauthenticated users to make the request", async () => {
       const res = await request.delete(
-        `/users/${idUser}/addresses/${idAddress}`,
+        `/users/${idUser}/addresses/${numAddress}`,
       );
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1433,7 +1433,7 @@ describe("user-crud-operations", () => {
         .exec();
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1450,7 +1450,7 @@ describe("user-crud-operations", () => {
       const idUser = "foo";
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1467,7 +1467,7 @@ describe("user-crud-operations", () => {
       const idUser = new Types.ObjectId().toString();
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1481,10 +1481,10 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const idAddress = -1;
+      const numAddress = -1;
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
@@ -1498,10 +1498,10 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const idAddress = 10;
+      const numAddress = 10;
 
       const res = await request
-        .delete(`/users/${idUser}/addresses/${idAddress}`)
+        .delete(`/users/${idUser}/addresses/${numAddress}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");

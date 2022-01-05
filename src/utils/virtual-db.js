@@ -29,7 +29,8 @@ function VirtualDB() {
   }
 
   async function connect() {
-    if (!uri) return log.warn("URI is required to connect to the MongoDB instance");
+    if (!uri)
+      return log.warn("URI is required to connect to the MongoDB instance");
 
     try {
       await mongoose.connect(uri, options);

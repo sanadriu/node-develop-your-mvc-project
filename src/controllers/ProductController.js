@@ -2,28 +2,36 @@ const { Types } = require("mongoose");
 const { ProductModel } = require("../models");
 
 async function getProducts(req, res, next) {
-  const limit = 10;
   const {
     query: { page = 1 },
   } = req;
 
+  const limit = 10;
+  const start = (page - 1) * limit;
+
   try {
     if (isNaN(page) || page <= 0) {
-      throw {
+      return res.status(400).send({
+        success: false,
         message: "Wrong page number",
-        status: 400,
-      };
+      });
     }
+
+    const count = await ProductModel.countDocuments();
+
+    if (start > count) return next();
 
     const result = await ProductModel.find({})
       .select("-__v -createdAt -updatedAt")
-      .skip((page - 1) * limit)
+      .skip(start)
       .limit(limit)
       .exec();
 
     res.status(200).send({
       success: true,
       data: result,
+      currentPage: page,
+      lastPage: Math.floor(count - 1 / limit) + 1,
     });
   } catch (error) {
     next(error);

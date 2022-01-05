@@ -3,10 +3,10 @@ const validator = require("validator");
 
 const orderSchema = new Schema(
   {
-    customer: {
+    idUser: {
       type: Schema.Types.ObjectId,
       ref: "user",
-      required: [true, "Customer ID is required"],
+      required: [true, "User ID is required"],
     },
     shippingAddress: {
       address: {
@@ -58,7 +58,8 @@ const orderSchema = new Schema(
     },
     products: [
       {
-        product: {
+        _id: false,
+        idProduct: {
           type: Schema.Types.ObjectId,
           ref: "product",
           required: [true, "Product must include its correspondent ID"],

@@ -22,55 +22,7 @@ async function getOrders(req, res, next) {
     if (start > count) return next();
 
     const result = await OrderModel.find()
-      .select("-__v updatedAt")
-      .skip(start)
-      .limit(limit)
-      .lean()
-      .exec();
-
-    res.status(200).send({
-      success: true,
-      data: result,
-      currentPage: page,
-      lastPage: Math.floor(count - 1 / limit) + 1,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function getUserOrders(req, res, next) {
-  const {
-    params: { idUser },
-    query: { page = 1 },
-  } = req;
-
-  if (req.query.customer) return next();
-
-  const limit = 10;
-  const start = (page - 1) * limit;
-
-  try {
-    if (isNaN(page) || page <= 0) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong page number",
-      });
-    }
-
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong customer ID",
-      });
-    }
-
-    const count = await OrderModel.countDocuments({ customer: idUser });
-
-    if (start > count) return next();
-
-    const result = await OrderModel.find({ customer: idUser })
-      .select("-__v updatedAt")
+      .select("-__v -updatedAt")
       .skip(start)
       .limit(limit)
       .lean()
@@ -101,7 +53,7 @@ async function getSingleOrder(req, res, next) {
     }
 
     const result = await OrderModel.findById(idOrder)
-      .select("-__v updatedAt")
+      .select("-__v -updatedAt")
       .lean()
       .exec();
 
@@ -120,7 +72,7 @@ async function createOrder(req, res, next) {
   const { body } = req;
 
   try {
-    const result = await OrderModel.create({ ...body, customer: req.user.id });
+    const result = await OrderModel.create({ ...body, idUser: req.user.id });
 
     res.status(201).send({
       success: true,

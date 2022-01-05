@@ -68,7 +68,7 @@ UserRouter.get(
 );
 
 UserRouter.get(
-  "/:idUser/addresses/:idAddress",
+  "/:idUser/addresses/:numAddress",
   authMiddleware,
   accessMiddleware,
   filterSomeMiddleware([allowAdmin, allowSelf]),
@@ -86,7 +86,7 @@ UserRouter.post(
 );
 
 UserRouter.patch(
-  "/:idUser/addresses/:idAddress",
+  "/:idUser/addresses/:numAddress",
   authMiddleware,
   accessMiddleware,
   filterSomeMiddleware([allowAdmin, allowSelf]),
@@ -95,7 +95,7 @@ UserRouter.patch(
 );
 
 UserRouter.delete(
-  "/:idUser/addresses/:idAddress",
+  "/:idUser/addresses/:numAddress",
   authMiddleware,
   accessMiddleware,
   filterSomeMiddleware([allowAdmin, allowSelf]),

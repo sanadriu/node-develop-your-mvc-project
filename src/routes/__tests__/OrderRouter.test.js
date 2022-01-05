@@ -1,7 +1,7 @@
 const db = require("../../utils/virtual-db");
 const app = require("../../server");
 const data = require("../../utils/sample-data");
-const { ProductModel, UserModel } = require("../../models");
+const { ProductModel, UserModel, OrderModel } = require("../../models");
 const { Types } = require("mongoose");
 const supertest = require("supertest");
 
@@ -27,15 +27,16 @@ describe("order-crud-operations", () => {
 
   describe("1. Get Orders", () => {
     beforeAll(async () => {
-      await ProductModel.insertMany(data.products);
+      const orders = await data.orders();
+      await OrderModel.insertMany(orders);
     });
 
     afterAll(async () => {
-      await ProductModel.deleteMany();
+      await OrderModel.deleteMany();
     });
 
     test("1.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = UserModel.findOne({ role: "main-admin" })
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
@@ -47,7 +48,9 @@ describe("order-crud-operations", () => {
     });
 
     test("1.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = UserModel.findOne({ role: "admin" }).lean().exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
 
       const res = await request.get("/orders").auth(token, { type: "bearer" });
 
@@ -56,19 +59,45 @@ describe("order-crud-operations", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("1.2. Successful operation returns an array of orders", async () => {
-      const { uid: token } = UserModel.findOne().lean().exec();
+    test("1.3. Do not allow users with 'customer' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "customer" })
+        .lean()
+        .exec();
+
+      const res = await request.get("/orders").auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("1.4. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.get("/orders");
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("1.5. Successful operation returns an array of orders", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
 
       const res = await request.get("/orders").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
       expect(res.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             _id: expect.any(String),
-            customer: expect.any(String),
+            idUser: expect.any(String),
             shippingCost: expect.any(Number),
             shippingAddress: {
               address: expect.any(String),
@@ -78,7 +107,7 @@ describe("order-crud-operations", () => {
             },
             products: expect.arrayContaining([
               {
-                product: expect.any(String),
+                idProduct: expect.any(String),
                 price: expect.any(Number),
                 units: expect.any(Number),
               },
@@ -89,21 +118,80 @@ describe("order-crud-operations", () => {
     });
   });
 
-  describe("2. Get single product", () => {
-    let idProduct;
+  describe("2. Get single order", () => {
+    let idOrder;
 
     beforeAll(async () => {
-      await ProductModel.insertMany(data.products);
+      const orders = await data.orders();
+      await OrderModel.insertMany(orders);
 
-      idProduct = (await ProductModel.findOne().lean().exec())._id;
+      idOrder = (await OrderModel.findOne().lean().exec())._id;
     });
 
     afterAll(async () => {
-      await ProductModel.deleteMany();
+      await OrderModel.deleteMany();
     });
 
-    test("2.1. Successful operation returns a product", async () => {
-      const res = await request.get(`/products/${idProduct}`);
+    test("2.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/orders/${idOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("2.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/orders/${idOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("2.3. Do not allow users with 'customer' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "customer" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/orders/${idOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("2.4. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.get(`/orders/${idOrder}`);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("2.5. Successful operation returns an order", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/orders/${idOrder}`)
+        .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -111,30 +199,52 @@ describe("order-crud-operations", () => {
       expect(res.body.data).toEqual(
         expect.objectContaining({
           _id: expect.any(String),
-          title: expect.any(String),
-          price: expect.any(Number),
-          stock: expect.any(Number),
-          description: expect.any(String),
-          images: expect.arrayContaining([expect.any(String)]),
+          idUser: expect.any(String),
+          shippingCost: expect.any(Number),
+          shippingAddress: {
+            address: expect.any(String),
+            city: expect.any(String),
+            postalCode: expect.any(String),
+            countryCode: expect.any(String),
+          },
+          products: expect.arrayContaining([
+            {
+              idProduct: expect.any(String),
+              price: expect.any(Number),
+              units: expect.any(Number),
+            },
+          ]),
         }),
       );
     });
 
-    test("2.2. Reply with 'bad request' if the id is invalid", async () => {
-      const idProduct = "foo";
+    test("2.6. Reply with 'bad request' if the id is invalid", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
 
-      const res = await request.get(`/products/${idProduct}`);
+      const idOrder = "foo";
+
+      const res = await request
+        .get(`/orders/${idOrder}`)
+        .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "Wrong product ID");
+      expect(res.body).toHaveProperty("message", "Wrong order ID");
     });
 
-    test("2.3. Reply with 'not found' if the user does not exist", async () => {
-      const idProduct = new Types.ObjectId().toString();
+    test("2.7. Reply with 'not found' if the order does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
 
-      const res = await request.get(`/products/${idProduct}`);
+      const idOrder = new Types.ObjectId().toString();
+
+      const res = await request
+        .get(`/orders/${idOrder}`)
+        .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
@@ -143,23 +253,48 @@ describe("order-crud-operations", () => {
     });
   });
 
-  describe("3. Create product", () => {
-    const body = {
-      title: "Magic Mushroom",
-      price: 3.99,
-      stock: 100,
-      description: "Mmm... Delicious",
-      images: [
-        "https://cdn.pixabay.com/photo/2018/08/06/16/30/mushroom-3587888_960_720.jpg",
-      ],
-    };
+  describe("3. Create order", () => {
+    let idUser;
+    let idProducts;
+    let body;
+
+    beforeAll(async () => {
+      idUser = (await UserModel.findOne().lean().exec())._id.toString();
+      idProducts = (await ProductModel.find().lean().exec()).map((product) =>
+        product._id.toString(),
+      );
+
+      body = {
+        idUser: idUser,
+        shippingCost: 15,
+        shippingAddress: {
+          address: "Le Baguette, 42",
+          countryCode: "FR",
+          postalCode: "69000",
+          city: "Lyon",
+        },
+        products: [
+          {
+            idProduct: idProducts[1],
+            price: 109.95,
+            units: 1,
+          },
+          {
+            idProduct: idProducts[2],
+            price: 55.99,
+            units: 9,
+          },
+        ],
+      };
+    });
 
     beforeEach(async () => {
-      await ProductModel.insertMany(data.products);
+      const orders = await data.orders();
+      await OrderModel.insertMany(orders);
     });
 
     afterEach(async () => {
-      await ProductModel.deleteMany();
+      await OrderModel.deleteMany();
     });
 
     test("3.1. Allow users with 'main-admin' role to make the request", async () => {
@@ -168,7 +303,7 @@ describe("order-crud-operations", () => {
         .exec();
 
       const res = await request
-        .post("/products")
+        .post("/orders")
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -183,7 +318,7 @@ describe("order-crud-operations", () => {
         .exec();
 
       const res = await request
-        .post("/products")
+        .post("/orders")
         .auth(token, { type: "bearer" })
         .send(body);
 
@@ -192,24 +327,23 @@ describe("order-crud-operations", () => {
       expect(res.body).toHaveProperty("success", true);
     });
 
-    test("3.3. Do not allow users with 'customer' role to make the request", async () => {
+    test("3.3. Allow users with 'customer' role to make the request", async () => {
       const { uid: token } = await UserModel.findOne({ role: "customer" })
         .lean()
         .exec();
 
       const res = await request
-        .post("/products")
+        .post("/orders")
         .auth(token, { type: "bearer" })
         .send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
-      expect(res.status).toBe(403);
-      expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "Forbidden");
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty("success", true);
     });
 
     test("3.4. Do not allow unauthenticated users to make the request", async () => {
-      const res = await request.post("/products").send(body);
+      const res = await request.post("/orders").send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(401);
@@ -217,20 +351,22 @@ describe("order-crud-operations", () => {
       expect(res.body).toHaveProperty("message", "Not authorized");
     });
 
-    test("3.5. Successful operation returns the new product", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+    test("3.5. Successful operation returns the new order with the corresponding user ID", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
+        role: "customer",
+      })
         .lean()
         .exec();
 
       const res = await request
-        .post("/products")
+        .post("/orders")
         .auth(token, { type: "bearer" })
         .send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("success", true);
-      expect(res.body.data).toMatchObject(body);
+      expect(res.body.data).toMatchObject({ ...body, idUser });
     });
   });
 });

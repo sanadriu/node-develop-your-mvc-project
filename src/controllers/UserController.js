@@ -1,10 +1,30 @@
 const { Types } = require("mongoose");
-const { UserModel } = require("../models");
+const { UserModel, OrderModel } = require("../models");
 
 async function getUsers(req, res, next) {
+  const {
+    query: { page = 1 },
+  } = req;
+
+  const limit = 10;
+  const start = (page - 1) * limit;
+
   try {
+    if (isNaN(page) || page <= 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong page number",
+      });
+    }
+
+    const count = await UserModel.countDocuments();
+
+    if (start > count) return next();
+
     const result = await UserModel.find({})
       .select("-__v -createdAt -updatedAt")
+      .skip(start)
+      .limit(limit)
       .lean()
       .exec();
 
@@ -163,7 +183,7 @@ async function getAddresses(req, res, next) {
 
 async function getSingleAddress(req, res, next) {
   const {
-    params: { idUser, idAddress },
+    params: { idUser, numAddress },
   } = req;
 
   try {
@@ -174,14 +194,14 @@ async function getSingleAddress(req, res, next) {
       });
     }
 
-    if (isNaN(idAddress) || idAddress <= 0) {
+    if (isNaN(numAddress) || numAddress <= 0) {
       return res.status(400).send({
         success: false,
         message: "Wrong address index",
       });
     }
 
-    const addressPath = `addresses.${idAddress - 1}`;
+    const addressPath = `addresses.${numAddress - 1}`;
 
     const result = await UserModel.findOne({
       _id: idUser,
@@ -195,7 +215,7 @@ async function getSingleAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result.addresses[idAddress - 1],
+      data: result.addresses[numAddress - 1],
     });
   } catch (error) {
     next(error);
@@ -245,7 +265,7 @@ async function addAddress(req, res, next) {
 
 async function updateAddress(req, res, next) {
   const {
-    params: { idUser, idAddress },
+    params: { idUser, numAddress },
     body,
   } = req;
 
@@ -257,14 +277,14 @@ async function updateAddress(req, res, next) {
       });
     }
 
-    if (isNaN(idAddress) || idAddress <= 0) {
+    if (isNaN(numAddress) || numAddress <= 0) {
       return res.status(400).send({
         success: false,
         message: "Wrong address index",
       });
     }
 
-    const addressPath = `addresses.${idAddress - 1}`;
+    const addressPath = `addresses.${numAddress - 1}`;
 
     const result = await UserModel.findOneAndUpdate(
       { _id: idUser, [addressPath]: { $exists: true } },
@@ -286,7 +306,7 @@ async function updateAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
-      data: result.addresses[idAddress - 1],
+      data: result.addresses[numAddress - 1],
     });
   } catch (error) {
     next(error);
@@ -294,7 +314,7 @@ async function updateAddress(req, res, next) {
 }
 
 async function deleteAddress(req, res, next) {
-  const { idUser, idAddress } = req.params;
+  const { idUser, numAddress } = req.params;
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
@@ -304,14 +324,14 @@ async function deleteAddress(req, res, next) {
       });
     }
 
-    if (isNaN(idAddress) || idAddress <= 0) {
+    if (isNaN(numAddress) || numAddress <= 0) {
       return res.status(400).send({
         success: false,
         message: "Wrong address index",
       });
     }
 
-    const addressPath = `addresses.${idAddress - 1}`;
+    const addressPath = `addresses.${numAddress - 1}`;
 
     const result = await UserModel.findOne({
       _id: idUser,
@@ -336,6 +356,93 @@ async function deleteAddress(req, res, next) {
 
     res.status(200).send({
       success: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getOrders(req, res, next) {
+  const {
+    params: { idUser },
+    query: { page = 1 },
+  } = req;
+
+  if (req.query.customer) return next();
+
+  const limit = 10;
+  const start = (page - 1) * limit;
+
+  try {
+    if (isNaN(page) || page <= 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong page number",
+      });
+    }
+
+    if (!Types.ObjectId.isValid(idUser)) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong user ID",
+      });
+    }
+
+    const count = await OrderModel.countDocuments({ customer: idUser });
+
+    if (start > count) return next();
+
+    const result = await OrderModel.find({ customer: idUser })
+      .select("-__v updatedAt")
+      .skip(start)
+      .limit(limit)
+      .lean()
+      .exec();
+
+    res.status(200).send({
+      success: true,
+      data: result,
+      currentPage: page,
+      lastPage: Math.floor(count - 1 / limit) + 1,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getSingleOrder(req, res, next) {
+  const {
+    params: { idUser, numOrder },
+  } = req;
+
+  try {
+    if (!Types.ObjectId.isValid(idUser)) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong user ID",
+      });
+    }
+
+    if (isNaN(numOrder) || numOrder <= 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Wrong order index",
+      });
+    }
+
+    const result = await OrderModel.findOne({
+      customer: idUser,
+    })
+      .skip(numAddress - 1)
+      .select("addresses")
+      .lean()
+      .exec();
+
+    if (!result) return next();
+
+    res.status(200).send({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -381,5 +488,7 @@ module.exports = {
   addAddress,
   updateAddress,
   deleteAddress,
+  getOrders,
+  getSingleOrder,
   signUp,
 };

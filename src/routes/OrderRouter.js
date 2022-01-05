@@ -1,13 +1,12 @@
 const express = require("express");
 
 const { OrderController } = require("../controllers");
-const { allowAdmin, allowSelfInQuery, allowUsers } = require("./filters");
+const { allowAdmin, allowUsers } = require("./filters");
 const {
   notFoundHandler,
   authMiddleware,
   accessMiddleware,
   filterMiddleware,
-  filterSomeMiddleware,
 } = require("../middlewares");
 
 const OrderRouter = express.Router();
@@ -16,7 +15,7 @@ OrderRouter.get(
   "/",
   authMiddleware,
   accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelfInQuery]),
+  filterMiddleware(allowAdmin),
   OrderController.getOrders,
   notFoundHandler,
 );
@@ -25,7 +24,7 @@ OrderRouter.get(
   "/:idOrder",
   authMiddleware,
   accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelfInQuery]),
+  filterMiddleware(allowAdmin),
   OrderController.getSingleOrder,
   notFoundHandler,
 );
@@ -40,4 +39,4 @@ OrderRouter.post(
 
 OrderRouter.use("/", notFoundHandler);
 
-OrderRouter.module.exports = OrderRouter;
+module.exports = OrderRouter;
