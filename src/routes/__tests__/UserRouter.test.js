@@ -1,7 +1,7 @@
 const db = require("../../utils/virtual-db");
 const app = require("../../server");
 const data = require("../../utils/sample-data");
-const { UserModel } = require("../../models");
+const { UserModel, OrderModel, ProductModel } = require("../../models");
 const { Types } = require("mongoose");
 const supertest = require("supertest");
 
@@ -106,20 +106,19 @@ describe("user-crud-operations", () => {
       );
     });
 
-    test("1.6. Successful operation if specified page exists", async () => {
+    test("1.6. Reply with 'bad request' if the specified page is not a number", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
 
       const res = await request
-        .get("/users?page=1")
+        .get("/users?page=foo")
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("success", true);
-      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
-      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong page number");
     });
 
     test("1.7. Reply with 'not found' if the specified page does not exist", async () => {
@@ -135,6 +134,22 @@ describe("user-crud-operations", () => {
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("success", false);
       expect(res.body).toHaveProperty("message", "Not found");
+    });
+
+    test("1.8. Successful operation if specified page exists", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get("/users?page=1")
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
     });
   });
 
@@ -986,7 +1001,7 @@ describe("user-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "Wrong address index");
+      expect(res.body).toHaveProperty("message", "Wrong address number");
     });
 
     test("7.10. Reply with 'not found' if the address does not exist", async () => {
@@ -1339,7 +1354,7 @@ describe("user-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "Wrong address index");
+      expect(res.body).toHaveProperty("message", "Wrong address number");
     });
 
     test("9.10. Reply with 'not found' if the address does not exist", async () => {
@@ -1523,7 +1538,7 @@ describe("user-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty("success", false);
-      expect(res.body).toHaveProperty("message", "Wrong address index");
+      expect(res.body).toHaveProperty("message", "Wrong address number");
     });
 
     test("10.10. Reply with 'not found' if the address does not exist", async () => {
@@ -1535,6 +1550,426 @@ describe("user-crud-operations", () => {
 
       const res = await request
         .delete(`/users/${idUser}/addresses/${numAddress}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
+    });
+  });
+
+  describe("11. Get orders", () => {
+    let idUser;
+
+    beforeAll(async () => {
+      await UserModel.insertMany(data.users);
+      await ProductModel.insertMany(data.products);
+      await OrderModel.insertMany(await data.orders());
+
+      idUser = (await OrderModel.findOne().lean().exec()).idUser;
+    });
+
+    afterAll(async () => {
+      await OrderModel.deleteMany();
+      await ProductModel.deleteMany();
+      await UserModel.deleteMany();
+    });
+
+    test("11.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("11.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("11.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const { uid: token, _id: idUser } = await UserModel.findOne({
+        role: "customer",
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("11.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
+        .lean()
+        .exec();
+
+      const { uid: token } = await UserModel.findOne({
+        role: "customer",
+        firstName: { $ne: "Alice" },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("11.5. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.get(`/users/${idUser}/orders`);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("11.6. Successful operation returns an array of orders", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            _id: expect.any(String),
+            idUser: expect.any(String),
+            shippingCost: expect.any(Number),
+            shippingAddress: {
+              address: expect.any(String),
+              city: expect.any(String),
+              postalCode: expect.any(String),
+              countryCode: expect.any(String),
+            },
+            products: expect.arrayContaining([
+              {
+                idProduct: expect.any(String),
+                price: expect.any(Number),
+                units: expect.any(Number),
+              },
+            ]),
+          }),
+        ]),
+      );
+    });
+
+    test("11.7. Reply with 'bad request' if the user id is invalid", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const idUser = "foo";
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong user ID");
+    });
+
+    test("11.8. Reply with 'not found' if the user does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const idUser = new Types.ObjectId().toString();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
+    });
+
+    test("11.9. Reply with 'not found' if the specified page does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders?page=1000`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
+    });
+
+    test("1.10. Reply with 'bad request' if the specified page is not a number", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders?page=foo`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong page number");
+    });
+
+    test("11.11. Successful operation if specified page exists", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders?page=1`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
+    });
+  });
+
+  describe("12. Get single order", () => {
+    let idUser;
+    let numOrder;
+
+    beforeAll(async () => {
+      await UserModel.insertMany(data.users);
+      await ProductModel.insertMany(data.products);
+      await OrderModel.insertMany(await data.orders());
+
+      idUser = (await OrderModel.findOne().lean().exec()).idUser;
+      numOrder = 1;
+    });
+
+    afterAll(async () => {
+      await OrderModel.deleteMany();
+      await ProductModel.deleteMany();
+      await UserModel.deleteMany();
+    });
+
+    test("12.1. Allow users with 'main-admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("12.2. Allow users with 'admin' role to make the request", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("12.3. Allow users with 'customer' role to make the request of themselves", async () => {
+      const {
+        idUser: { _id: idUser, uid: token },
+      } = await OrderModel.findOne()
+        .populate({
+          path: "idUser",
+          select: "uid _id",
+          match: { role: "customer" },
+        })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+    });
+
+    test("12.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
+      const {
+        idUser: { _id: idUser },
+      } = await OrderModel.findOne()
+        .populate({
+          path: "idUser",
+          select: "uid _id",
+          match: { firstName: "Alice" },
+        })
+        .lean()
+        .exec();
+
+      const { uid: token } = await UserModel.findOne({
+        role: "customer",
+        firstName: { $ne: "Alice" },
+      })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Forbidden");
+    });
+
+    test("12.5. Do not allow unauthenticated users to make the request", async () => {
+      const res = await request.get(`/users/${idUser}/orders/${numOrder}`);
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not authorized");
+    });
+
+    test("12.6. Successful operation returns an order", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body.data).toEqual(
+        expect.objectContaining({
+          _id: expect.any(String),
+          idUser: expect.any(String),
+          shippingCost: expect.any(Number),
+          shippingAddress: {
+            address: expect.any(String),
+            city: expect.any(String),
+            postalCode: expect.any(String),
+            countryCode: expect.any(String),
+          },
+          products: expect.arrayContaining([
+            {
+              idProduct: expect.any(String),
+              price: expect.any(Number),
+              units: expect.any(Number),
+            },
+          ]),
+        }),
+      );
+    });
+
+    test("12.7. Reply with 'bad request' if the user id is invalid", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const idUser = "foo";
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong user ID");
+    });
+
+    test("12.8. Reply with 'not found' if the user does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const idUser = new Types.ObjectId().toString();
+
+      const res = await request
+        .get(`/users/${idUser}/orders`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
+    });
+
+    test("12.9. Reply with 'bad request' if the order is not a positive number (zero excluded)", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const numOrder = -1;
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong order number");
+    });
+
+    test("12.10. Reply with 'not found' if the order does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const numOrder = 1000;
+
+      const res = await request
+        .get(`/users/${idUser}/orders/${numOrder}`)
         .auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");

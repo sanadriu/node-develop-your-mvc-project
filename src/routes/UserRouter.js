@@ -106,7 +106,7 @@ UserRouter.get(
   authMiddleware,
   accessMiddleware,
   filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.deleteAddress,
+  UserController.getOrders,
   notFoundHandler,
 );
 
@@ -115,7 +115,7 @@ UserRouter.get(
   authMiddleware,
   accessMiddleware,
   filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.deleteAddress,
+  UserController.getSingleOrder,
   notFoundHandler,
 );
 

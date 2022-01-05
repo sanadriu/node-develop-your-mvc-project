@@ -199,7 +199,7 @@ async function getSingleAddress(req, res, next) {
     if (isNaN(numAddress) || numAddress <= 0) {
       return res.status(400).send({
         success: false,
-        message: "Wrong address index",
+        message: "Wrong address number",
       });
     }
 
@@ -282,7 +282,7 @@ async function updateAddress(req, res, next) {
     if (isNaN(numAddress) || numAddress <= 0) {
       return res.status(400).send({
         success: false,
-        message: "Wrong address index",
+        message: "Wrong address number",
       });
     }
 
@@ -329,7 +329,7 @@ async function deleteAddress(req, res, next) {
     if (isNaN(numAddress) || numAddress <= 0) {
       return res.status(400).send({
         success: false,
-        message: "Wrong address index",
+        message: "Wrong address number",
       });
     }
 
@@ -370,8 +370,6 @@ async function getOrders(req, res, next) {
     query: { page = 1 },
   } = req;
 
-  if (req.query.customer) return next();
-
   const limit = 10;
   const start = (page - 1) * limit;
 
@@ -390,11 +388,15 @@ async function getOrders(req, res, next) {
       });
     }
 
-    const count = await OrderModel.countDocuments({ customer: idUser });
+    const exists = await UserModel.findById(idUser).lean().exec();
+
+    if (!exists) return next();
+
+    const count = await OrderModel.countDocuments({ idUser });
 
     if (start > count) return next();
 
-    const result = await OrderModel.find({ customer: idUser })
+    const result = await OrderModel.find({ idUser })
       .select("-updatedAt")
       .skip(start)
       .limit(limit)
@@ -428,14 +430,18 @@ async function getSingleOrder(req, res, next) {
     if (isNaN(numOrder) || numOrder <= 0) {
       return res.status(400).send({
         success: false,
-        message: "Wrong order index",
+        message: "Wrong order number",
       });
     }
 
+    const exists = await UserModel.findById(idUser).lean().exec();
+
+    if (!exists) return next();
+
     const result = await OrderModel.findOne({
-      customer: idUser,
+      idUser,
     })
-      .skip(numAddress - 1)
+      .skip(numOrder - 1)
       .select("-updatedAt")
       .lean()
       .exec();
@@ -456,8 +462,6 @@ async function signUp(req, res, next) {
 
   try {
     const user = await UserModel.findOne({ uid, email }).lean().exec();
-
-    console.log(user);
 
     if (user) {
       res.status(200).send({

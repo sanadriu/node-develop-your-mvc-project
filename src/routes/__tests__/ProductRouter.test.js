@@ -64,7 +64,16 @@ describe("product-crud-operations", () => {
       expect(res.body).toHaveProperty("lastPage", expect.any(Number));
     });
 
-    test("1.3. Reply with 'not found' if the specified page does not exist", async () => {
+    test("1.3. Reply with 'bad request' if the specified page is not a number", async () => {
+      const res = await request.get("/products?page=foo");
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong page number");
+    });
+
+    test("1.4. Reply with 'not found' if the specified page does not exist", async () => {
       const res = await request.get("/products?page=1000");
 
       expect(res.headers["content-type"]).toMatch("application/json");

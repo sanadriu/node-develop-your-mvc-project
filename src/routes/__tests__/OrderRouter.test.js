@@ -27,8 +27,7 @@ describe("order-crud-operations", () => {
 
   describe("1. Get Orders", () => {
     beforeAll(async () => {
-      const orders = await data.orders();
-      await OrderModel.insertMany(orders);
+      await OrderModel.insertMany(await data.orders());
     });
 
     afterAll(async () => {
@@ -133,7 +132,22 @@ describe("order-crud-operations", () => {
       expect(res.body).toHaveProperty("lastPage", expect.any(Number));
     });
 
-    test("1.7. Reply with 'not found' if the specified page does not exist", async () => {
+    test("1.7. Reply with 'bad request' if the specified page is not a number", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get("/orders?page=foo")
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Wrong page number");
+    });
+
+    test("1.8. Reply with 'not found' if the specified page does not exist", async () => {
       const { uid: token } = await UserModel.findOne({ role: "main-admin" })
         .lean()
         .exec();
@@ -153,8 +167,7 @@ describe("order-crud-operations", () => {
     let idOrder;
 
     beforeAll(async () => {
-      const orders = await data.orders();
-      await OrderModel.insertMany(orders);
+      await OrderModel.insertMany(await data.orders());
 
       idOrder = (await OrderModel.findOne().lean().exec())._id;
     });
@@ -320,8 +333,7 @@ describe("order-crud-operations", () => {
     });
 
     beforeEach(async () => {
-      const orders = await data.orders();
-      await OrderModel.insertMany(orders);
+      await OrderModel.insertMany(await data.orders());
     });
 
     afterEach(async () => {
