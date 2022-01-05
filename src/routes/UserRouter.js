@@ -38,8 +38,6 @@ UserRouter.post(
   UserController.createUser,
 );
 
-UserRouter.post("/sign-up", UserController.signUp);
-
 UserRouter.patch(
   "/:idUser",
   authMiddleware,
@@ -102,6 +100,26 @@ UserRouter.delete(
   UserController.deleteAddress,
   notFoundHandler,
 );
+
+UserRouter.get(
+  "/:idUser/orders",
+  authMiddleware,
+  accessMiddleware,
+  filterSomeMiddleware([allowAdmin, allowSelf]),
+  UserController.deleteAddress,
+  notFoundHandler,
+);
+
+UserRouter.get(
+  "/:idUser/orders/:numOrder",
+  authMiddleware,
+  accessMiddleware,
+  filterSomeMiddleware([allowAdmin, allowSelf]),
+  UserController.deleteAddress,
+  notFoundHandler,
+);
+
+UserRouter.post("/sign-up", UserController.signUp);
 
 UserRouter.use("/:id/addresses", notFoundHandler);
 UserRouter.use("/", notFoundHandler);

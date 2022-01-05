@@ -22,7 +22,7 @@ async function getProducts(req, res, next) {
     if (start > count) return next();
 
     const result = await ProductModel.find({})
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .skip(start)
       .limit(limit)
       .exec();
@@ -30,8 +30,8 @@ async function getProducts(req, res, next) {
     res.status(200).send({
       success: true,
       data: result,
-      currentPage: page,
-      lastPage: Math.floor(count - 1 / limit) + 1,
+      currentPage: Number(page),
+      lastPage: Math.floor(count / limit) + (count % limit ? 1 : 0),
     });
   } catch (error) {
     next(error);
@@ -52,7 +52,7 @@ async function getSingleProduct(req, res, next) {
     }
 
     const result = await ProductModel.findById(idProduct)
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -71,7 +71,9 @@ async function createProduct(req, res, next) {
   const { body } = req;
 
   try {
-    const result = await ProductModel.create(body);
+    const { createdAt, updatedAt, ...result } = (
+      await ProductModel.create(body)
+    ).toJSON();
 
     res.status(201).send({
       success: true,
@@ -134,7 +136,7 @@ async function deleteProduct(req, res, next) {
     }
 
     const result = await ProductModel.findByIdAndDelete(idProduct)
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .lean()
       .exec();
 

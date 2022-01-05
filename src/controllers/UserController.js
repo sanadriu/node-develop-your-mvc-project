@@ -22,7 +22,7 @@ async function getUsers(req, res, next) {
     if (start > count) return next();
 
     const result = await UserModel.find({})
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .skip(start)
       .limit(limit)
       .lean()
@@ -31,6 +31,8 @@ async function getUsers(req, res, next) {
     res.status(200).send({
       success: true,
       data: result,
+      currentPage: Number(page),
+      lastPage: Math.floor(count / limit) + (count % limit ? 1 : 0),
     });
   } catch (error) {
     next(error);
@@ -51,7 +53,7 @@ async function getSingleUser(req, res, next) {
     }
 
     const result = await UserModel.findById(idUser)
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -70,7 +72,7 @@ async function createUser(req, res, next) {
   const { body } = req;
 
   try {
-    const { __v, createdAt, updatedAt, ...result } = (
+    const { createdAt, updatedAt, ...result } = (
       await UserModel.create(body)
     ).toJSON();
 
@@ -107,7 +109,7 @@ async function updateUser(req, res, next) {
         runValidators: true,
       },
     )
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -136,7 +138,7 @@ async function deleteUser(req, res, next) {
     }
 
     const result = await UserModel.findByIdAndDelete(idUser)
-      .select("-__v -createdAt -updatedAt")
+      .select("-createdAt -updatedAt")
       .lean()
       .exec();
 
@@ -393,7 +395,7 @@ async function getOrders(req, res, next) {
     if (start > count) return next();
 
     const result = await OrderModel.find({ customer: idUser })
-      .select("-__v updatedAt")
+      .select("-updatedAt")
       .skip(start)
       .limit(limit)
       .lean()
@@ -402,8 +404,8 @@ async function getOrders(req, res, next) {
     res.status(200).send({
       success: true,
       data: result,
-      currentPage: page,
-      lastPage: Math.floor(count - 1 / limit) + 1,
+      currentPage: Number(page),
+      lastPage: Math.floor(count / limit) + (count % limit ? 1 : 0),
     });
   } catch (error) {
     next(error);
@@ -434,7 +436,7 @@ async function getSingleOrder(req, res, next) {
       customer: idUser,
     })
       .skip(numAddress - 1)
-      .select("addresses")
+      .select("-updatedAt")
       .lean()
       .exec();
 
@@ -468,7 +470,7 @@ async function signUp(req, res, next) {
 
       res.status(201).send({
         success: true,
-        message: "User account has been created successfully.",
+        message: "User account has been created successfully",
         data: { _id: newUser._id },
       });
     }

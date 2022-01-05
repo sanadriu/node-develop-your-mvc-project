@@ -116,6 +116,37 @@ describe("order-crud-operations", () => {
         ]),
       );
     });
+
+    test("1.6. Successful operation if specified page exists", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get("/orders?page=1")
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
+    });
+
+    test("1.7. Reply with 'not found' if the specified page does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get("/orders?page=1000")
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
+    });
   });
 
   describe("2. Get single order", () => {

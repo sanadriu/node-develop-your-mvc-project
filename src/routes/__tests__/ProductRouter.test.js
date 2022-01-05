@@ -38,6 +38,8 @@ describe("product-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
       expect(res.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -50,6 +52,25 @@ describe("product-crud-operations", () => {
           }),
         ]),
       );
+    });
+
+    test("1.2. Successful operation if specified page exists", async () => {
+      const res = await request.get("/products?page=1");
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
+    });
+
+    test("1.3. Reply with 'not found' if the specified page does not exist", async () => {
+      const res = await request.get("/products?page=1000");
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 

@@ -33,7 +33,7 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const res = await request.get("/users/").auth(token, { type: "bearer" });
+      const res = await request.get("/users").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -45,7 +45,7 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const res = await request.get("/users/").auth(token, { type: "bearer" });
+      const res = await request.get("/users").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -57,7 +57,7 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const res = await request.get("/users/").auth(token, { type: "bearer" });
+      const res = await request.get("/users").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(403);
@@ -66,7 +66,7 @@ describe("user-crud-operations", () => {
     });
 
     test("1.4. Do not allow unauthenticated users to make the request", async () => {
-      const res = await request.get("/users/");
+      const res = await request.get("/users");
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(401);
@@ -79,11 +79,13 @@ describe("user-crud-operations", () => {
         .lean()
         .exec();
 
-      const res = await request.get("/users/").auth(token, { type: "bearer" });
+      const res = await request.get("/users").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
       expect(res.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -102,6 +104,37 @@ describe("user-crud-operations", () => {
           }),
         ]),
       );
+    });
+
+    test("1.6. Successful operation if specified page exists", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get("/users?page=1")
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(res.body).toHaveProperty("currentPage", expect.any(Number));
+      expect(res.body).toHaveProperty("lastPage", expect.any(Number));
+    });
+
+    test("1.7. Reply with 'not found' if the specified page does not exist", async () => {
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
+        .lean()
+        .exec();
+
+      const res = await request
+        .get("/users?page=1000")
+        .auth(token, { type: "bearer" });
+
+      expect(res.headers["content-type"]).toMatch("application/json");
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty("success", false);
+      expect(res.body).toHaveProperty("message", "Not found");
     });
   });
 
