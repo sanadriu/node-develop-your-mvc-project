@@ -98,8 +98,8 @@ describe("order-crud-operations", () => {
             _id: expect.any(String),
             user: {
               _id: expect.any(String),
-              firstName: expect.any(String),
-              lastName: expect.any(String),
+              firstname: expect.any(String),
+              lastname: expect.any(String),
               email: expect.any(String),
             },
             shippingCost: expect.any(Number),
@@ -254,8 +254,8 @@ describe("order-crud-operations", () => {
         _id: expect.any(String),
         user: {
           _id: expect.any(String),
-          firstName: expect.any(String),
-          lastName: expect.any(String),
+          firstname: expect.any(String),
+          lastname: expect.any(String),
           email: expect.any(String),
         },
         shippingCost: expect.any(Number),

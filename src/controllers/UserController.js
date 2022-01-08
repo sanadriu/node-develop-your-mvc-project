@@ -467,7 +467,7 @@ async function sync(req, res, next) {
 
   try {
     const user = await UserModel.findOne({ uid })
-      .select("_id role email firstName lastName")
+      .select("_id role email firstname lastname")
       .lean()
       .exec();
 
@@ -485,8 +485,8 @@ async function sync(req, res, next) {
         _id: data._id,
         role: data.role,
         email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastname,
+        firstname: data.firstname,
+        lastname: data.lastname,
       };
 
       res.status(201).send({

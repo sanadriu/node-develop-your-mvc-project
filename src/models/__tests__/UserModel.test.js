@@ -20,8 +20,8 @@ describe("User Schema", () => {
   const correctUserData = {
     uid: "0000",
     email: "mail@foo.com",
-    firstName: "Alice",
-    lastName: "Anderson",
+    firstname: "Alice",
+    lastname: "Anderson",
     phoneNumber: "+34600000000",
     addresses: [
       {
@@ -164,12 +164,12 @@ describe("User Schema", () => {
 
       const userData = {
         ...correctUserData,
-        firstName: ` ${correctUserData.firstName} `,
+        firstname: ` ${correctUserData.firstname} `,
       };
 
       await expect(UserModel.create(userData)).resolves.toHaveProperty(
-        "firstName",
-        correctUserData.firstName,
+        "firstname",
+        correctUserData.firstname,
       );
     });
 
@@ -178,14 +178,14 @@ describe("User Schema", () => {
 
       const userData = {
         ...correctUserData,
-        firstName: generateRandomSequence(33),
+        firstname: generateRandomSequence(33),
       };
 
       try {
         await UserModel.create(userData);
       } catch (error) {
-        expect(error.errors.firstName.properties.type).toBe("maxlength");
-        expect(error.errors.firstName.properties.message).toBe(
+        expect(error.errors.firstname.properties.type).toBe("maxlength");
+        expect(error.errors.firstname.properties.message).toBe(
           "Firstname length must not be longer than 32 characters",
         );
       }
@@ -198,7 +198,7 @@ describe("User Schema", () => {
 
       const userData = {
         ...correctUserData,
-        lastName: ` ${correctUserData.lastName} `,
+        lastname: ` ${correctUserData.lastname} `,
       };
 
       await expect(UserModel.create(userData)).resolves.toHaveProperty(
@@ -212,14 +212,14 @@ describe("User Schema", () => {
 
       const userData = {
         ...correctUserData,
-        lastName: generateRandomSequence(33),
+        lastname: generateRandomSequence(33),
       };
 
       try {
         await UserModel.create(userData);
       } catch (error) {
-        expect(error.errors.lastName.properties.type).toBe("maxlength");
-        expect(error.errors.lastName.properties.message).toBe(
+        expect(error.errors.lastname.properties.type).toBe("maxlength");
+        expect(error.errors.lastname.properties.message).toBe(
           "Lastname length must not be longer than 32 characters",
         );
       }

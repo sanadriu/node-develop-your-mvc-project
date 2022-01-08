@@ -4,8 +4,8 @@ const users = [
   {
     uid: "0001",
     email: "alice@foo.com",
-    firstName: "Alice",
-    lastName: "Jordan",
+    firstname: "Alice",
+    lastname: "Jordan",
     phoneNumber: "+447700000001",
     addresses: [
       {
@@ -25,8 +25,8 @@ const users = [
   {
     uid: "0002",
     email: "bob@foo.com",
-    firstName: "Bob",
-    lastName: "Williams",
+    firstname: "Bob",
+    lastname: "Williams",
     phoneNumber: "+447700000002",
     addresses: [
       {
@@ -46,8 +46,8 @@ const users = [
   {
     uid: "0003",
     email: "albertus@foo.com",
-    firstName: "Alberto",
-    lastName: "Chica",
+    firstname: "Alberto",
+    lastname: "Chica",
     phoneNumber: "+34699999999",
     addresses: [
       {
@@ -61,8 +61,8 @@ const users = [
   {
     uid: "0004",
     email: "gonzalus@foo.com",
-    firstName: "Gonzalo",
-    lastName: "G. Arahuetes",
+    firstname: "Gonzalo",
+    lastname: "G. Arahuetes",
     phoneNumber: "+33700000001",
     addresses: [
       {

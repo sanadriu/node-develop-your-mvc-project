@@ -33,12 +33,12 @@ const userSchema = new Schema(
       default: "customer",
       trim: true,
     },
-    firstName: {
+    firstname: {
       type: String,
       trim: true,
       maxlength: [32, "Firstname length must not be longer than 32 characters"],
     },
-    lastName: {
+    lastname: {
       type: String,
       trim: true,
       maxlength: [32, "Lastname length must not be longer than 32 characters"],

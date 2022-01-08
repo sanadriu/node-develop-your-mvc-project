@@ -24,7 +24,7 @@ async function getOrders(req, res, next) {
     const result = await OrderModel.find()
       .select("-updatedAt")
       .populate("products.product", "title description images")
-      .populate("user", "firstName lastName email")
+      .populate("user", "firstname lastname email")
       .skip(start)
       .limit(limit)
       .lean()
@@ -57,7 +57,7 @@ async function getSingleOrder(req, res, next) {
     const result = await OrderModel.findById(idOrder)
       .select("-updatedAt")
       .populate("products.product", "title description images")
-      .populate("user", "firstName lastName email")
+      .populate("user", "firstname lastname email")
       .lean()
       .exec();
 

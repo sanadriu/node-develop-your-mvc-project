@@ -211,13 +211,13 @@ describe("user-crud-operations", () => {
     });
 
     test("2.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
-      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
+      const { _id: idUser } = await UserModel.findOne({ firstname: "Alice" })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -308,8 +308,8 @@ describe("user-crud-operations", () => {
     const body = {
       uid: "2000",
       email: "foo@bar.com",
-      firstName: "Dummy",
-      lastName: "Lemon",
+      firstname: "Dummy",
+      lastname: "Lemon",
       phoneNumber: "+34600700800",
       addresses: [
         {
@@ -406,8 +406,8 @@ describe("user-crud-operations", () => {
     const body = {
       uid: "2000",
       email: "foo@bar.com",
-      firstName: "Dummy",
-      lastName: "Lemon",
+      firstname: "Dummy",
+      lastname: "Lemon",
       phoneNumber: "+34600700800",
       addresses: [
         {
@@ -478,13 +478,13 @@ describe("user-crud-operations", () => {
     });
 
     test("4.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
-      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
+      const { _id: idUser } = await UserModel.findOne({ firstname: "Alice" })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -747,13 +747,13 @@ describe("user-crud-operations", () => {
     });
 
     test("6.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
-      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
+      const { _id: idUser } = await UserModel.findOne({ firstname: "Alice" })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -900,14 +900,14 @@ describe("user-crud-operations", () => {
     test("7.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
       const { _id: idUser } = await UserModel.findOne({
         "addresses.0": { $exists: true },
-        firstName: "Alice",
+        firstname: "Alice",
       })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -1090,14 +1090,14 @@ describe("user-crud-operations", () => {
     test("8.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
       const { _id: idUser } = await UserModel.findOne({
         "addresses.0": { $exists: true },
-        firstName: "Alice",
+        firstname: "Alice",
       })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -1251,14 +1251,14 @@ describe("user-crud-operations", () => {
     test("9.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
       const { _id: idUser } = await UserModel.findOne({
         "addresses.0": { $exists: true },
-        firstName: "Alice",
+        firstname: "Alice",
       })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -1440,14 +1440,14 @@ describe("user-crud-operations", () => {
     test("10.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
       const { _id: idUser } = await UserModel.findOne({
         "addresses.0": { $exists: true },
-        firstName: "Alice",
+        firstname: "Alice",
       })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -1619,13 +1619,13 @@ describe("user-crud-operations", () => {
     });
 
     test("11.4. Do not allow users with 'customer' role to make the request if they are not themselves", async () => {
-      const { _id: idUser } = await UserModel.findOne({ firstName: "Alice" })
+      const { _id: idUser } = await UserModel.findOne({ firstname: "Alice" })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
@@ -1847,14 +1847,14 @@ describe("user-crud-operations", () => {
         .populate({
           path: "user",
           select: "uid _id",
-          match: { firstName: "Alice" },
+          match: { firstname: "Alice" },
         })
         .lean()
         .exec();
 
       const { uid: token } = await UserModel.findOne({
         role: "customer",
-        firstName: { $ne: "Alice" },
+        firstname: { $ne: "Alice" },
       })
         .lean()
         .exec();
