@@ -462,25 +462,36 @@ async function getSingleOrder(req, res, next) {
   }
 }
 
-async function signUp(req, res, next) {
-  const { uid, email } = req.body;
+async function sync(req, res, next) {
+  const { uid, email } = req.user;
 
   try {
-    const user = await UserModel.findOne({ uid, email }).lean().exec();
+    const user = await UserModel.findOne({ uid })
+      .select("_id role email firstName lastName")
+      .lean()
+      .exec();
 
     if (user) {
       res.status(200).send({
         success: true,
-        message: "User already existed",
-        data: { _id: user._id },
+        data: user,
       });
     } else {
-      const newUser = await UserModel.create({ uid, email, role: "customer" });
+      const { createdAt, updatedAt, ...data } = (
+        await UserModel.create({ uid, email })
+      ).toJSON();
+
+      const newUser = {
+        _id: data._id,
+        role: data.role,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastname,
+      };
 
       res.status(201).send({
         success: true,
-        message: "User account has been created successfully",
-        data: { _id: newUser._id },
+        data: newUser,
       });
     }
   } catch (error) {
@@ -501,5 +512,5 @@ module.exports = {
   deleteAddress,
   getOrders,
   getSingleOrder,
-  signUp,
+  sync,
 };

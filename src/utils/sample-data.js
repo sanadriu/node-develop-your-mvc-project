@@ -6,7 +6,6 @@ const users = [
     email: "alice@foo.com",
     firstName: "Alice",
     lastName: "Jordan",
-    phoneLocale: "en-GB",
     phoneNumber: "+447700000001",
     addresses: [
       {
@@ -28,7 +27,6 @@ const users = [
     email: "bob@foo.com",
     firstName: "Bob",
     lastName: "Williams",
-    phoneLocale: "en-GB",
     phoneNumber: "+447700000002",
     addresses: [
       {
@@ -50,7 +48,6 @@ const users = [
     email: "albertus@foo.com",
     firstName: "Alberto",
     lastName: "Chica",
-    phoneLocale: "es-ES",
     phoneNumber: "+34699999999",
     addresses: [
       {
@@ -66,7 +63,6 @@ const users = [
     email: "gonzalus@foo.com",
     firstName: "Gonzalo",
     lastName: "G. Arahuetes",
-    phoneLocale: "fr-FR",
     phoneNumber: "+33700000001",
     addresses: [
       {

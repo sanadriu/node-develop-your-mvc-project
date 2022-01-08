@@ -4,7 +4,6 @@ const data = require("../../utils/sample-data");
 const { UserModel, OrderModel, ProductModel } = require("../../models");
 const { Types } = require("mongoose");
 const supertest = require("supertest");
-const { default: expectCt } = require("helmet/dist/middlewares/expect-ct");
 
 jest.mock("../../middlewares/authMiddleware");
 
@@ -312,7 +311,6 @@ describe("user-crud-operations", () => {
       firstName: "Dummy",
       lastName: "Lemon",
       phoneNumber: "+34600700800",
-      phoneLocale: "es-ES",
       addresses: [
         {
           address: "Lucky Avenue, 777",
@@ -411,7 +409,6 @@ describe("user-crud-operations", () => {
       firstName: "Dummy",
       lastName: "Lemon",
       phoneNumber: "+34600700800",
-      phoneLocale: "es-ES",
       addresses: [
         {
           address: "Lucky Avenue, 777",

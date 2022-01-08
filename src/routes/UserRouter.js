@@ -119,7 +119,7 @@ UserRouter.get(
   notFoundHandler,
 );
 
-UserRouter.post("/sign-up", UserController.signUp);
+UserRouter.post("/sync", authMiddleware, UserController.sync);
 
 UserRouter.use("/:id/addresses", notFoundHandler);
 UserRouter.use("/", notFoundHandler);

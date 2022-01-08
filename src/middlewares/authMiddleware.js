@@ -11,11 +11,12 @@ async function authMiddleware(req, res, next) {
     const authToken = req.headers.authorization.split(" ")[1];
     const authUser = await auth.verifyIdToken(authToken);
 
-    const { uid } = authUser;
+    const { uid, email } = authUser;
 
     req.user = {
       ...req.user,
       uid,
+      email,
     };
 
     next();

@@ -22,7 +22,6 @@ describe("User Schema", () => {
     email: "mail@foo.com",
     firstName: "Alice",
     lastName: "Anderson",
-    phoneLocale: "es-ES",
     phoneNumber: "+34600000000",
     addresses: [
       {
@@ -73,7 +72,10 @@ describe("User Schema", () => {
         uid: ` ${correctUserData.uid} `,
       };
 
-      await expect(UserModel.create(userData)).resolves.toHaveProperty("uid", correctUserData.uid);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty(
+        "uid",
+        correctUserData.uid,
+      );
     });
   });
 
@@ -111,7 +113,10 @@ describe("User Schema", () => {
         email: ` ${correctUserData.email} `,
       };
 
-      await expect(UserModel.create(userData)).resolves.toHaveProperty("email", correctUserData.email);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty(
+        "email",
+        correctUserData.email,
+      );
     });
 
     test("2.4. email max length is 64", async () => {
@@ -126,7 +131,9 @@ describe("User Schema", () => {
         await UserModel.create(userData);
       } catch (error) {
         expect(error.errors.email.properties.type).toBe("maxlength");
-        expect(error.errors.email.properties.message).toBe("Email length must not be longer than 64 characters");
+        expect(error.errors.email.properties.message).toBe(
+          "Email length must not be longer than 64 characters",
+        );
       }
     });
 
@@ -144,7 +151,9 @@ describe("User Schema", () => {
         await UserModel.create(userData);
       } catch (error) {
         expect(error.errors.email.properties.type).toBe("user defined");
-        expect(error.errors.email.properties.message).toBe(`${email} is not a valid email`);
+        expect(error.errors.email.properties.message).toBe(
+          `${email} is not a valid email`,
+        );
       }
     });
   });
@@ -158,7 +167,10 @@ describe("User Schema", () => {
         firstName: ` ${correctUserData.firstName} `,
       };
 
-      await expect(UserModel.create(userData)).resolves.toHaveProperty("firstName", correctUserData.firstName);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty(
+        "firstName",
+        correctUserData.firstName,
+      );
     });
 
     test("3.2. firstname max length is 32", async () => {
@@ -189,7 +201,10 @@ describe("User Schema", () => {
         lastName: ` ${correctUserData.lastName} `,
       };
 
-      await expect(UserModel.create(userData)).resolves.toHaveProperty("lastname", correctUserData.lastname);
+      await expect(UserModel.create(userData)).resolves.toHaveProperty(
+        "lastname",
+        correctUserData.lastname,
+      );
     });
 
     test("4.2. lastname max length is 32", async () => {
@@ -204,7 +219,9 @@ describe("User Schema", () => {
         await UserModel.create(userData);
       } catch (error) {
         expect(error.errors.lastName.properties.type).toBe("maxlength");
-        expect(error.errors.lastName.properties.message).toBe("Lastname length must not be longer than 32 characters");
+        expect(error.errors.lastName.properties.message).toBe(
+          "Lastname length must not be longer than 32 characters",
+        );
       }
     });
   });
@@ -224,7 +241,7 @@ describe("User Schema", () => {
     test("5.2. phone number is valid", async () => {
       expect.assertions(2);
 
-      const phoneNumber = "+3460100100";
+      const phoneNumber = "+any";
 
       const userData = {
         ...correctUserData,
@@ -253,8 +270,12 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.address"].properties.type).toBe("required");
-          expect(error.errors["addresses.0.address"].properties.message).toBe("Address is required");
+          expect(error.errors["addresses.0.address"].properties.type).toBe(
+            "required",
+          );
+          expect(error.errors["addresses.0.address"].properties.message).toBe(
+            "Address is required",
+          );
         }
       });
 
@@ -279,7 +300,9 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.address"].properties.type).toBe("maxlength");
+          expect(error.errors["addresses.0.address"].properties.type).toBe(
+            "maxlength",
+          );
           expect(error.errors["addresses.0.address"].properties.message).toBe(
             "Address length must not be longer than 64 characters",
           );
@@ -297,8 +320,12 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.city"].properties.type).toBe("required");
-          expect(error.errors["addresses.0.city"].properties.message).toBe("City is required");
+          expect(error.errors["addresses.0.city"].properties.type).toBe(
+            "required",
+          );
+          expect(error.errors["addresses.0.city"].properties.message).toBe(
+            "City is required",
+          );
         }
       });
 
@@ -323,7 +350,9 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.city"].properties.type).toBe("maxlength");
+          expect(error.errors["addresses.0.city"].properties.type).toBe(
+            "maxlength",
+          );
           expect(error.errors["addresses.0.city"].properties.message).toBe(
             "City length must not be longer than 64 characters",
           );
@@ -341,8 +370,12 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.countryCode"].properties.type).toBe("required");
-          expect(error.errors["addresses.0.countryCode"].properties.message).toBe("Country code is required");
+          expect(error.errors["addresses.0.countryCode"].properties.type).toBe(
+            "required",
+          );
+          expect(
+            error.errors["addresses.0.countryCode"].properties.message,
+          ).toBe("Country code is required");
         }
       });
 
@@ -369,10 +402,12 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.countryCode"].properties.type).toBe("user defined");
-          expect(error.errors["addresses.0.countryCode"].properties.message).toBe(
-            `${countryCode} is not a valid country code`,
+          expect(error.errors["addresses.0.countryCode"].properties.type).toBe(
+            "user defined",
           );
+          expect(
+            error.errors["addresses.0.countryCode"].properties.message,
+          ).toBe(`${countryCode} is not a valid country code`);
         }
       });
     });
@@ -387,8 +422,12 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.postalCode"].properties.type).toBe("required");
-          expect(error.errors["addresses.0.postalCode"].properties.message).toBe("Postal code is required");
+          expect(error.errors["addresses.0.postalCode"].properties.type).toBe(
+            "required",
+          );
+          expect(
+            error.errors["addresses.0.postalCode"].properties.message,
+          ).toBe("Postal code is required");
         }
       });
 
@@ -415,8 +454,12 @@ describe("User Schema", () => {
         try {
           await UserModel.create(userData);
         } catch (error) {
-          expect(error.errors["addresses.0.postalCode"].properties.type).toBe("user defined");
-          expect(error.errors["addresses.0.postalCode"].properties.message).toBe(
+          expect(error.errors["addresses.0.postalCode"].properties.type).toBe(
+            "user defined",
+          );
+          expect(
+            error.errors["addresses.0.postalCode"].properties.message,
+          ).toBe(
             `${postalCode} is not a valid postal code for the given country code`,
           );
         }
@@ -432,7 +475,10 @@ describe("User Schema", () => {
           role: "customer",
         };
 
-        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "customer");
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "role",
+          "customer",
+        );
       });
 
       test("7.2. 'admin' role is valid", async () => {
@@ -443,7 +489,10 @@ describe("User Schema", () => {
           role: "admin",
         };
 
-        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "admin");
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "role",
+          "admin",
+        );
       });
 
       test("7.3. 'main-admin' role is valid", async () => {
@@ -454,7 +503,10 @@ describe("User Schema", () => {
           role: "main-admin",
         };
 
-        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "main-admin");
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "role",
+          "main-admin",
+        );
       });
 
       test("7.4. 'customer' role is the default value", async () => {
@@ -462,7 +514,10 @@ describe("User Schema", () => {
 
         const userData = { ...correctUserData };
 
-        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "customer");
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "role",
+          "customer",
+        );
       });
 
       test("7.5. other given roles are not valid", async () => {
@@ -477,7 +532,9 @@ describe("User Schema", () => {
           await UserModel.create(userData);
         } catch (error) {
           expect(error.errors.role.properties.type).toBe("enum");
-          expect(error.errors.role.properties.message).toBe("The given role is not valid");
+          expect(error.errors.role.properties.message).toBe(
+            "The given role is not valid",
+          );
         }
       });
 
@@ -489,7 +546,10 @@ describe("User Schema", () => {
           role: " customer ",
         };
 
-        await expect(UserModel.create(userData)).resolves.toHaveProperty("role", "customer");
+        await expect(UserModel.create(userData)).resolves.toHaveProperty(
+          "role",
+          "customer",
+        );
       });
     });
   });

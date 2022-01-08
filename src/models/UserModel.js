@@ -43,28 +43,14 @@ const userSchema = new Schema(
       trim: true,
       maxlength: [32, "Lastname length must not be longer than 32 characters"],
     },
-    phoneLocale: {
-      type: String,
-      trim: true,
-      validate: {
-        validator: function (value) {
-          return validator.isLocale(value);
-        },
-        message: function (props) {
-          return `${props.value} is not a valid locale`;
-        },
-      },
-    },
     phoneNumber: {
       type: String,
       trim: true,
       validate: {
         validator: function (value) {
-          return this.phoneLocale
-            ? validator.isMobilePhone(value, this.phoneLocale, {
-                strictMode: true,
-              })
-            : true;
+          return validator.isMobilePhone(value, "any", {
+            strictMode: true,
+          });
         },
         message: function (props) {
           return `${props.value} is not a valid phone for the specified locale`;

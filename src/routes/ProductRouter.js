@@ -11,7 +11,7 @@ const {
 
 const ProductsRouter = express.Router();
 
-ProductsRouter.get("/", ProductController.getProducts);
+ProductsRouter.get("/", ProductController.getProducts, notFoundHandler);
 
 ProductsRouter.get(
   "/:idProduct",
