@@ -6,6 +6,7 @@ const { Types } = require("mongoose");
 const supertest = require("supertest");
 
 jest.mock("../../middlewares/authMiddleware");
+jest.mock("../../services/firebase");
 
 describe("user-crud-operations", () => {
   const request = supertest(app);
@@ -306,7 +307,6 @@ describe("user-crud-operations", () => {
 
   describe("3. Create user", () => {
     const body = {
-      uid: "2000",
       email: "foo@bar.com",
       firstname: "Dummy",
       lastname: "Lemon",
@@ -398,7 +398,7 @@ describe("user-crud-operations", () => {
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("success", true);
-      expect(res.body.data).toMatchObject(body);
+      expect(res.body.data).toMatchObject({ ...body, uid: expect.any(String) });
     });
   });
 

@@ -1,5 +1,6 @@
 const { Types } = require("mongoose");
 const { UserModel, OrderModel } = require("../models");
+const { auth } = require("../services/firebase");
 
 async function getUsers(req, res, next) {
   const {
@@ -70,10 +71,18 @@ async function getSingleUser(req, res, next) {
 
 async function createUser(req, res, next) {
   const { body } = req;
+  const { password, email, phone: phoneNumber } = body;
 
   try {
+    const { uid } = await auth.createUser({
+      email,
+      password,
+      phoneNumber,
+      displayName: email,
+    });
+
     const { createdAt, updatedAt, ...result } = (
-      await UserModel.create(body)
+      await UserModel.create({ uid, ...body })
     ).toJSON();
 
     res.status(201).send({
@@ -91,6 +100,8 @@ async function updateUser(req, res, next) {
     body,
   } = req;
 
+  const { password, email, phone: phoneNumber } = body;
+
   try {
     if (!Types.ObjectId.isValid(idUser)) {
       return res.status(400).send({
@@ -98,6 +109,14 @@ async function updateUser(req, res, next) {
         message: "Wrong user ID",
       });
     }
+
+    const { uid } = await auth.getUserByEmail(email);
+
+    await auth.updateUser(uid, {
+      password,
+      phoneNumber,
+      displayName: email,
+    });
 
     const result = await UserModel.findByIdAndUpdate(
       idUser,
