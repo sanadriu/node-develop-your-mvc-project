@@ -6,7 +6,7 @@ const users = [
     email: "alice@foo.com",
     firstname: "Alice",
     lastname: "Jordan",
-    phoneNumber: "+447700000001",
+    phone: "+447700000001",
     addresses: [
       {
         address: "False Street, 123",
@@ -27,7 +27,7 @@ const users = [
     email: "bob@foo.com",
     firstname: "Bob",
     lastname: "Williams",
-    phoneNumber: "+447700000002",
+    phone: "+447700000002",
     addresses: [
       {
         address: "Chocolate Street, 45",
@@ -48,7 +48,7 @@ const users = [
     email: "albertus@foo.com",
     firstname: "Alberto",
     lastname: "Chica",
-    phoneNumber: "+34699999999",
+    phone: "+34699999999",
     addresses: [
       {
         address: "Bad Avenue, 89",
@@ -63,7 +63,7 @@ const users = [
     email: "gonzalus@foo.com",
     firstname: "Gonzalo",
     lastname: "G. Arahuetes",
-    phoneNumber: "+33700000001",
+    phone: "+33700000001",
     addresses: [
       {
         address: "Le Baguette, 42",

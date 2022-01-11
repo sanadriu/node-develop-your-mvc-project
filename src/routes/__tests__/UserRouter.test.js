@@ -310,7 +310,7 @@ describe("user-crud-operations", () => {
       email: "foo@bar.com",
       firstname: "Dummy",
       lastname: "Lemon",
-      phoneNumber: "+34600700800",
+      phone: "+34600700800",
       addresses: [
         {
           address: "Lucky Avenue, 777",
@@ -408,7 +408,7 @@ describe("user-crud-operations", () => {
       email: "foo@bar.com",
       firstname: "Dummy",
       lastname: "Lemon",
-      phoneNumber: "+34600700800",
+      phone: "+34600700800",
       addresses: [
         {
           address: "Lucky Avenue, 777",

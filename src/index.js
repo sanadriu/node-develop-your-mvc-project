@@ -6,7 +6,7 @@ const seedData = require("./utils/seed-data");
 
 db.connect()
   .then(async () => {
-    await seedData();
+    //await seedData();
 
     app.listen(4000, () => {
       log.info(`Server listening on localhost:${config.app.port}`);

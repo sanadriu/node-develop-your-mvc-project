@@ -22,7 +22,7 @@ describe("User Schema", () => {
     email: "mail@foo.com",
     firstname: "Alice",
     lastname: "Anderson",
-    phoneNumber: "+34600000000",
+    phone: "+34600000000",
     addresses: [
       {
         address: "False Street, 123",
@@ -230,30 +230,30 @@ describe("User Schema", () => {
     test("5.1. phone number is trimmed", async () => {
       const userData = {
         ...correctUserData,
-        phoneNumber: ` ${correctUserData.phoneNumber} `,
+        phone: ` ${correctUserData.phone} `,
       };
 
       const user = await UserModel.create(userData);
 
-      expect(user.phoneNumber).toBe(correctUserData.phoneNumber);
+      expect(user.phone).toBe(correctUserData.phone);
     });
 
     test("5.2. phone number is valid", async () => {
       expect.assertions(2);
 
-      const phoneNumber = "+any";
+      const phone = "+any";
 
       const userData = {
         ...correctUserData,
-        phoneNumber,
+        phone,
       };
 
       try {
         await UserModel.create(userData);
       } catch (error) {
-        expect(error.errors.phoneNumber.properties.type).toBe("user defined");
-        expect(error.errors.phoneNumber.properties.message).toBe(
-          `${phoneNumber} is not a valid phone for the specified locale`,
+        expect(error.errors.phone.properties.type).toBe("user defined");
+        expect(error.errors.phone.properties.message).toBe(
+          `${phone} is not a valid phone for the specified locale`,
         );
       }
     });

@@ -43,7 +43,7 @@ const userSchema = new Schema(
       trim: true,
       maxlength: [32, "Lastname length must not be longer than 32 characters"],
     },
-    phoneNumber: {
+    phone: {
       type: String,
       trim: true,
       validate: {

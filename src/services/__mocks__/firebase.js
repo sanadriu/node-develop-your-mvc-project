@@ -7,5 +7,6 @@ module.exports = {
     createUser: () => ({ uid: generateRandomSequence(28, chars) }),
     getUserByEmail: () => ({ uid: generateRandomSequence(28, chars) }),
     updateUser: () => {},
+    deleteUser: () => {},
   },
 };

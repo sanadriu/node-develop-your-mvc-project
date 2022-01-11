@@ -71,14 +71,13 @@ async function getSingleUser(req, res, next) {
 
 async function createUser(req, res, next) {
   const { body } = req;
-  const { password, email, phone: phoneNumber } = body;
+  const { password, email } = body;
 
   try {
     const { uid } = await auth.createUser({
       email,
-      password,
-      phoneNumber,
       displayName: email,
+      password,
     });
 
     const { createdAt, updatedAt, ...result } = (
@@ -97,10 +96,8 @@ async function createUser(req, res, next) {
 async function updateUser(req, res, next) {
   const {
     params: { idUser },
-    body,
+    body: { uid, email, password, ...body },
   } = req;
-
-  const { password, email, phone: phoneNumber } = body;
 
   try {
     if (!Types.ObjectId.isValid(idUser)) {
@@ -109,14 +106,6 @@ async function updateUser(req, res, next) {
         message: "Wrong user ID",
       });
     }
-
-    const { uid } = await auth.getUserByEmail(email);
-
-    await auth.updateUser(uid, {
-      password,
-      phoneNumber,
-      displayName: email,
-    });
 
     const result = await UserModel.findByIdAndUpdate(
       idUser,
@@ -133,6 +122,8 @@ async function updateUser(req, res, next) {
       .exec();
 
     if (!result) return next();
+
+    if (password) await auth.updateUser(result.uid, { password });
 
     res.status(200).send({
       success: true,
@@ -162,6 +153,8 @@ async function deleteUser(req, res, next) {
       .exec();
 
     if (!result) return next();
+
+    await auth.deleteUser(result.uid);
 
     res.status(200).send({
       success: true,
@@ -415,7 +408,7 @@ async function getOrders(req, res, next) {
 
     if (start > count) return next();
 
-    const result = await OrderModel.find({ idUser })
+    const result = await OrderModel.find({ user: idUser })
       .select("-updatedAt -user")
       .populate("products.product", "title description images")
       .skip(start)
@@ -458,9 +451,7 @@ async function getSingleOrder(req, res, next) {
 
     if (!exists) return next();
 
-    const result = await OrderModel.findOne({
-      idUser,
-    })
+    const result = await OrderModel.findOne({ user: idUser })
       .skip(numOrder - 1)
       .select("-updatedAt -user")
       .populate({
