@@ -1,4 +1,4 @@
-const log = require("../log");
+const log = require("../services/logger");
 
 function errorHandler(err, req, res, next) {
   log.warn(err.message);

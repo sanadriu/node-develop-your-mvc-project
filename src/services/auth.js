@@ -5,8 +5,12 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-const auth = admin.auth();
+const { createUser, getUserByEmail, updateUser, deleteUser, verifyIdToken } = admin.auth();
 
 module.exports = {
-  auth,
+  createUser,
+  getUserByEmail,
+  updateUser,
+  deleteUser,
+  verifyIdToken,
 };

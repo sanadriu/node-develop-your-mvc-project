@@ -1,7 +1,6 @@
-const db = require("../../utils/virtual-db");
+const db = require("../../services/db");
 const ProductModel = require("../ProductModel");
-const generateRandomSequence = require("../../utils/generateRandomSequence");
-const deepClone = require("../../utils/deepClone");
+const { generateRandomSequence, deepClone } = require("../../utils");
 
 describe("Product Schema", () => {
   beforeAll(async () => {
@@ -14,6 +13,7 @@ describe("Product Schema", () => {
   });
 
   afterAll(async () => {
+    await db.disconnect();
     await db.stop();
   });
 
@@ -150,9 +150,7 @@ describe("Product Schema", () => {
         await ProductModel.create(productData);
       } catch (error) {
         expect(error.errors.price.properties.type).toBe("min");
-        expect(error.errors.price.properties.message).toBe(
-          "Price must be greater or equal than 0",
-        );
+        expect(error.errors.price.properties.message).toBe("Price must be greater or equal than 0");
       }
     });
   });
@@ -195,9 +193,7 @@ describe("Product Schema", () => {
         await ProductModel.create(productData);
       } catch (error) {
         expect(error.errors.stock.properties.type).toBe("min");
-        expect(error.errors.stock.properties.message).toBe(
-          "Stock must be greater or equal than 0",
-        );
+        expect(error.errors.stock.properties.message).toBe("Stock must be greater or equal than 0");
       }
     });
   });

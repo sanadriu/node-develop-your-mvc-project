@@ -13,6 +13,10 @@ const {
 
 const UserRouter = express.Router();
 
+UserRouter.get("/sync", authMiddleware, accessMiddleware, UserController.sync);
+
+UserRouter.post("/register", UserController.register);
+
 UserRouter.get(
   "/",
   authMiddleware,
@@ -57,51 +61,6 @@ UserRouter.delete(
 );
 
 UserRouter.get(
-  "/:idUser/addresses",
-  authMiddleware,
-  accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.getAddresses,
-  notFoundHandler,
-);
-
-UserRouter.get(
-  "/:idUser/addresses/:numAddress",
-  authMiddleware,
-  accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.getSingleAddress,
-  notFoundHandler,
-);
-
-UserRouter.post(
-  "/:idUser/addresses/",
-  authMiddleware,
-  accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.addAddress,
-  notFoundHandler,
-);
-
-UserRouter.patch(
-  "/:idUser/addresses/:numAddress",
-  authMiddleware,
-  accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.updateAddress,
-  notFoundHandler,
-);
-
-UserRouter.delete(
-  "/:idUser/addresses/:numAddress",
-  authMiddleware,
-  accessMiddleware,
-  filterSomeMiddleware([allowAdmin, allowSelf]),
-  UserController.deleteAddress,
-  notFoundHandler,
-);
-
-UserRouter.get(
   "/:idUser/orders",
   authMiddleware,
   accessMiddleware,
@@ -119,9 +78,6 @@ UserRouter.get(
   notFoundHandler,
 );
 
-UserRouter.post("/sync", authMiddleware, UserController.sync);
-
-UserRouter.use("/:id/addresses", notFoundHandler);
-UserRouter.use("/", notFoundHandler);
+UserRouter.use("*", notFoundHandler);
 
 module.exports = UserRouter;

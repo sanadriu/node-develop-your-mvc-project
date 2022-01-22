@@ -37,6 +37,6 @@ OrderRouter.post(
   OrderController.createOrder,
 );
 
-OrderRouter.use("/", notFoundHandler);
+OrderRouter.use("*", notFoundHandler);
 
 module.exports = OrderRouter;

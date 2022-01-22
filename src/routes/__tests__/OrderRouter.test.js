@@ -1,6 +1,6 @@
-const db = require("../../utils/virtual-db");
+const db = require("../../services/db");
 const app = require("../../server");
-const data = require("../../utils/sample-data");
+const data = require("../../data");
 const { ProductModel, UserModel, OrderModel } = require("../../models");
 const { Types } = require("mongoose");
 const supertest = require("supertest");
@@ -22,6 +22,7 @@ describe("order-crud-operations", () => {
     await UserModel.deleteMany();
     await ProductModel.deleteMany();
 
+    await db.disconnect();
     await db.stop();
   });
 
@@ -35,9 +36,7 @@ describe("order-crud-operations", () => {
     });
 
     test("1.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const res = await request.get("/orders").auth(token, { type: "bearer" });
 
@@ -47,9 +46,7 @@ describe("order-crud-operations", () => {
     });
 
     test("1.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" }).lean().exec();
 
       const res = await request.get("/orders").auth(token, { type: "bearer" });
 
@@ -59,9 +56,7 @@ describe("order-crud-operations", () => {
     });
 
     test("1.3. Do not allow users with 'customer' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "customer" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "customer" }).lean().exec();
 
       const res = await request.get("/orders").auth(token, { type: "bearer" });
 
@@ -81,9 +76,7 @@ describe("order-crud-operations", () => {
     });
 
     test("1.5. Successful operation returns an array of orders", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const res = await request.get("/orders").auth(token, { type: "bearer" });
 
@@ -127,13 +120,9 @@ describe("order-crud-operations", () => {
     });
 
     test("1.6. Successful operation if specified page exists", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .get("/orders?page=1")
-        .auth(token, { type: "bearer" });
+      const res = await request.get("/orders?page=1").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -143,13 +132,9 @@ describe("order-crud-operations", () => {
     });
 
     test("1.7. Reply with 'bad request' if the specified page is not a number", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .get("/orders?page=foo")
-        .auth(token, { type: "bearer" });
+      const res = await request.get("/orders?page=foo").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
@@ -158,13 +143,9 @@ describe("order-crud-operations", () => {
     });
 
     test("1.8. Reply with 'not found' if the specified page does not exist", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .get("/orders?page=1000")
-        .auth(token, { type: "bearer" });
+      const res = await request.get("/orders?page=1000").auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
@@ -187,13 +168,9 @@ describe("order-crud-operations", () => {
     });
 
     test("2.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .get(`/orders/${idOrder}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.get(`/orders/${idOrder}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -201,13 +178,9 @@ describe("order-crud-operations", () => {
     });
 
     test("2.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" }).lean().exec();
 
-      const res = await request
-        .get(`/orders/${idOrder}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.get(`/orders/${idOrder}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -215,13 +188,9 @@ describe("order-crud-operations", () => {
     });
 
     test("2.3. Do not allow users with 'customer' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "customer" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "customer" }).lean().exec();
 
-      const res = await request
-        .get(`/orders/${idOrder}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.get(`/orders/${idOrder}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(403);
@@ -239,13 +208,9 @@ describe("order-crud-operations", () => {
     });
 
     test("2.5. Successful operation returns an order", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .get(`/orders/${idOrder}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.get(`/orders/${idOrder}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -281,15 +246,11 @@ describe("order-crud-operations", () => {
     });
 
     test("2.6. Reply with 'bad request' if the id is invalid", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const idOrder = "foo";
 
-      const res = await request
-        .get(`/orders/${idOrder}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.get(`/orders/${idOrder}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
@@ -298,15 +259,11 @@ describe("order-crud-operations", () => {
     });
 
     test("2.7. Reply with 'not found' if the order does not exist", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const idOrder = new Types.ObjectId().toString();
 
-      const res = await request
-        .get(`/orders/${idOrder}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.get(`/orders/${idOrder}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);
@@ -359,14 +316,9 @@ describe("order-crud-operations", () => {
     });
 
     test("3.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .post("/orders")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/orders").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
@@ -374,14 +326,9 @@ describe("order-crud-operations", () => {
     });
 
     test("3.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" }).lean().exec();
 
-      const res = await request
-        .post("/orders")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/orders").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
@@ -389,14 +336,9 @@ describe("order-crud-operations", () => {
     });
 
     test("3.3. Allow users with 'customer' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "customer" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "customer" }).lean().exec();
 
-      const res = await request
-        .post("/orders")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/orders").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
@@ -419,10 +361,7 @@ describe("order-crud-operations", () => {
         .lean()
         .exec();
 
-      const res = await request
-        .post("/orders")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/orders").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);

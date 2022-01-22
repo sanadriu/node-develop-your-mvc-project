@@ -15,11 +15,12 @@ async function accessMiddleware(req, res, next) {
       .lean()
       .exec();
 
-    if (!result)
+    if (!result) {
       return res.status(401).send({
         success: false,
         message: "Not authorized",
       });
+    }
 
     const { role, _id: id } = result;
 

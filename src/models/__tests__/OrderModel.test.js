@@ -1,10 +1,9 @@
-const db = require("../../utils/virtual-db");
-const data = require("../../utils/sample-data");
+const db = require("../../services/db");
+const data = require("../../data");
 const OrderModel = require("../OrderModel");
 const UserModel = require("../UserModel");
 const ProductModel = require("../ProductModel");
-const generateRandomSequence = require("../../utils/generateRandomSequence");
-const deepClone = require("../../utils/deepClone");
+const { generateRandomSequence, deepClone } = require("../../utils");
 
 describe("Order Schema", () => {
   let idUser;
@@ -19,9 +18,7 @@ describe("Order Schema", () => {
     await ProductModel.insertMany(data.products);
 
     idUser = (await UserModel.findOne().lean().exec())._id.toString();
-    idProducts = (await ProductModel.find().lean().exec()).map((product) =>
-      product._id.toString(),
-    );
+    idProducts = (await ProductModel.find().lean().exec()).map((product) => product._id.toString());
 
     correctOrderData = {
       user: idUser,
@@ -55,6 +52,7 @@ describe("Order Schema", () => {
     await UserModel.deleteMany();
     await ProductModel.deleteMany();
 
+    await db.disconnect();
     await db.stop();
   });
 
@@ -68,9 +66,7 @@ describe("Order Schema", () => {
         await OrderModel.create(orderData);
       } catch (error) {
         expect(error.errors.user.properties.type).toBe("required");
-        expect(error.errors.user.properties.message).toBe(
-          "User ID is required",
-        );
+        expect(error.errors.user.properties.message).toBe("User ID is required");
       }
     });
 
@@ -99,12 +95,10 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(error.errors["shippingAddress.address"].properties.type).toBe(
-            "required",
+          expect(error.errors["shippingAddress.address"].properties.type).toBe("required");
+          expect(error.errors["shippingAddress.address"].properties.message).toBe(
+            "Address is required",
           );
-          expect(
-            error.errors["shippingAddress.address"].properties.message,
-          ).toBe("Address is required");
         }
       });
 
@@ -129,12 +123,10 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(error.errors["shippingAddress.address"].properties.type).toBe(
-            "maxlength",
+          expect(error.errors["shippingAddress.address"].properties.type).toBe("maxlength");
+          expect(error.errors["shippingAddress.address"].properties.message).toBe(
+            "Address length must not be longer than 64 characters",
           );
-          expect(
-            error.errors["shippingAddress.address"].properties.message,
-          ).toBe("Address length must not be longer than 64 characters");
         }
       });
     });
@@ -149,12 +141,8 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(error.errors["shippingAddress.city"].properties.type).toBe(
-            "required",
-          );
-          expect(error.errors["shippingAddress.city"].properties.message).toBe(
-            "City is required",
-          );
+          expect(error.errors["shippingAddress.city"].properties.type).toBe("required");
+          expect(error.errors["shippingAddress.city"].properties.message).toBe("City is required");
         }
       });
 
@@ -179,9 +167,7 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(error.errors["shippingAddress.city"].properties.type).toBe(
-            "maxlength",
-          );
+          expect(error.errors["shippingAddress.city"].properties.type).toBe("maxlength");
           expect(error.errors["shippingAddress.city"].properties.message).toBe(
             "City length must not be longer than 64 characters",
           );
@@ -199,12 +185,10 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(
-            error.errors["shippingAddress.countryCode"].properties.type,
-          ).toBe("required");
-          expect(
-            error.errors["shippingAddress.countryCode"].properties.message,
-          ).toBe("Country code is required");
+          expect(error.errors["shippingAddress.countryCode"].properties.type).toBe("required");
+          expect(error.errors["shippingAddress.countryCode"].properties.message).toBe(
+            "Country code is required",
+          );
         }
       });
 
@@ -231,12 +215,10 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(
-            error.errors["shippingAddress.countryCode"].properties.type,
-          ).toBe("user defined");
-          expect(
-            error.errors["shippingAddress.countryCode"].properties.message,
-          ).toBe(`${countryCode} is not a valid country code`);
+          expect(error.errors["shippingAddress.countryCode"].properties.type).toBe("user defined");
+          expect(error.errors["shippingAddress.countryCode"].properties.message).toBe(
+            `${countryCode} is not a valid country code`,
+          );
         }
       });
     });
@@ -251,12 +233,10 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(
-            error.errors["shippingAddress.postalCode"].properties.type,
-          ).toBe("required");
-          expect(
-            error.errors["shippingAddress.postalCode"].properties.message,
-          ).toBe("Postal code is required");
+          expect(error.errors["shippingAddress.postalCode"].properties.type).toBe("required");
+          expect(error.errors["shippingAddress.postalCode"].properties.message).toBe(
+            "Postal code is required",
+          );
         }
       });
 
@@ -283,12 +263,8 @@ describe("Order Schema", () => {
         try {
           await OrderModel.create(orderData);
         } catch (error) {
-          expect(
-            error.errors["shippingAddress.postalCode"].properties.type,
-          ).toBe("user defined");
-          expect(
-            error.errors["shippingAddress.postalCode"].properties.message,
-          ).toBe(
+          expect(error.errors["shippingAddress.postalCode"].properties.type).toBe("user defined");
+          expect(error.errors["shippingAddress.postalCode"].properties.message).toBe(
             `${postalCode} is not a valid postal code for the given country code`,
           );
         }
@@ -347,9 +323,7 @@ describe("Order Schema", () => {
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.product"].properties.type).toBe(
-              "required",
-            );
+            expect(error.errors["products.0.product"].properties.type).toBe("required");
             expect(error.errors["products.0.product"].properties.message).toBe(
               "Product must include its correspondent ID",
             );
@@ -380,9 +354,7 @@ describe("Order Schema", () => {
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.price"].properties.type).toBe(
-              "required",
-            );
+            expect(error.errors["products.0.price"].properties.type).toBe("required");
             expect(error.errors["products.0.price"].properties.message).toBe(
               "Product must include its correspondent price",
             );
@@ -411,9 +383,7 @@ describe("Order Schema", () => {
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.price"].properties.type).toBe(
-              "min",
-            );
+            expect(error.errors["products.0.price"].properties.type).toBe("min");
             expect(error.errors["products.0.price"].properties.message).toBe(
               "Price must be greater or equal than 0",
             );
@@ -431,9 +401,7 @@ describe("Order Schema", () => {
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.units"].properties.type).toBe(
-              "required",
-            );
+            expect(error.errors["products.0.units"].properties.type).toBe("required");
             expect(error.errors["products.0.units"].properties.message).toBe(
               "Product must include the number of units",
             );
@@ -462,9 +430,7 @@ describe("Order Schema", () => {
           try {
             await OrderModel.create(orderData);
           } catch (error) {
-            expect(error.errors["products.0.units"].properties.type).toBe(
-              "min",
-            );
+            expect(error.errors["products.0.units"].properties.type).toBe("min");
             expect(error.errors["products.0.units"].properties.message).toBe(
               "Units must be greater or equal than 0",
             );

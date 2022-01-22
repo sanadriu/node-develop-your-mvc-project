@@ -1,6 +1,6 @@
-const db = require("../../utils/virtual-db");
+const db = require("../../services/db");
 const app = require("../../server");
-const data = require("../../utils/sample-data");
+const data = require("../../data");
 const { ProductModel, UserModel } = require("../../models");
 const { Types } = require("mongoose");
 const supertest = require("supertest");
@@ -20,6 +20,7 @@ describe("product-crud-operations", () => {
   afterAll(async () => {
     await UserModel.deleteMany();
 
+    await db.disconnect();
     await db.stop();
   });
 
@@ -143,9 +144,7 @@ describe("product-crud-operations", () => {
       price: 3.99,
       stock: 100,
       description: "Mmm... Delicious",
-      images: [
-        "https://cdn.pixabay.com/photo/2018/08/06/16/30/mushroom-3587888_960_720.jpg",
-      ],
+      images: ["https://cdn.pixabay.com/photo/2018/08/06/16/30/mushroom-3587888_960_720.jpg"],
     };
 
     beforeEach(async () => {
@@ -157,14 +156,9 @@ describe("product-crud-operations", () => {
     });
 
     test("3.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .post("/products")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/products").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
@@ -172,14 +166,9 @@ describe("product-crud-operations", () => {
     });
 
     test("3.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" }).lean().exec();
 
-      const res = await request
-        .post("/products")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/products").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
@@ -187,14 +176,9 @@ describe("product-crud-operations", () => {
     });
 
     test("3.3. Do not allow users with 'customer' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "customer" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "customer" }).lean().exec();
 
-      const res = await request
-        .post("/products")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/products").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(403);
@@ -212,14 +196,9 @@ describe("product-crud-operations", () => {
     });
 
     test("3.5. Successful operation returns the new product", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .post("/products")
-        .auth(token, { type: "bearer" })
-        .send(body);
+      const res = await request.post("/products").auth(token, { type: "bearer" }).send(body);
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(201);
@@ -234,9 +213,7 @@ describe("product-crud-operations", () => {
       price: 3.99,
       stock: 100,
       description: "Mmm... Delicious",
-      images: [
-        "https://cdn.pixabay.com/photo/2018/08/06/16/30/mushroom-3587888_960_720.jpg",
-      ],
+      images: ["https://cdn.pixabay.com/photo/2018/08/06/16/30/mushroom-3587888_960_720.jpg"],
     };
 
     let idProduct;
@@ -251,9 +228,7 @@ describe("product-crud-operations", () => {
     });
 
     test("4.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const res = await request
         .patch(`/products/${idProduct}`)
@@ -266,9 +241,7 @@ describe("product-crud-operations", () => {
     });
 
     test("4.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" }).lean().exec();
 
       const res = await request
         .patch(`/products/${idProduct}`)
@@ -308,9 +281,7 @@ describe("product-crud-operations", () => {
     });
 
     test("4.5. Successful operation returns the updated product", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const res = await request
         .patch(`/products/${idProduct}`)
@@ -323,9 +294,7 @@ describe("product-crud-operations", () => {
     });
 
     test("4.6. Reply with 'bad request' if the id is invalid", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const idProduct = "foo";
 
@@ -341,9 +310,7 @@ describe("product-crud-operations", () => {
     });
 
     test("4.7. Reply with 'not found' if the user does not exist", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const idProduct = new Types.ObjectId().toString();
 
@@ -372,13 +339,9 @@ describe("product-crud-operations", () => {
     });
 
     test("5.1. Allow users with 'main-admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .delete(`/products/${idProduct}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.delete(`/products/${idProduct}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -386,13 +349,9 @@ describe("product-crud-operations", () => {
     });
 
     test("5.2. Allow users with 'admin' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "admin" }).lean().exec();
 
-      const res = await request
-        .delete(`/products/${idProduct}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.delete(`/products/${idProduct}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(200);
@@ -400,13 +359,9 @@ describe("product-crud-operations", () => {
     });
 
     test("5.3. Do not allow users with 'customer' role to make the request", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "customer" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "customer" }).lean().exec();
 
-      const res = await request
-        .delete(`/products/${idProduct}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.delete(`/products/${idProduct}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(403);
@@ -424,13 +379,9 @@ describe("product-crud-operations", () => {
     });
 
     test("5.5. Successful operation only returns 'success' as true", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
-      const res = await request
-        .delete(`/products/${idProduct}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.delete(`/products/${idProduct}`).auth(token, { type: "bearer" });
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
@@ -438,15 +389,11 @@ describe("product-crud-operations", () => {
     });
 
     test("5.6. Reply with 'bad request' if the id is invalid", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const idProduct = "foo";
 
-      const res = await request
-        .delete(`/products/${idProduct}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.delete(`/products/${idProduct}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(400);
@@ -455,15 +402,11 @@ describe("product-crud-operations", () => {
     });
 
     test("5.7. Reply with 'not found' if the user does not exist", async () => {
-      const { uid: token } = await UserModel.findOne({ role: "main-admin" })
-        .lean()
-        .exec();
+      const { uid: token } = await UserModel.findOne({ role: "main-admin" }).lean().exec();
 
       const idProduct = new Types.ObjectId().toString();
 
-      const res = await request
-        .delete(`/products/${idProduct}`)
-        .auth(token, { type: "bearer" });
+      const res = await request.delete(`/products/${idProduct}`).auth(token, { type: "bearer" });
 
       expect(res.headers["content-type"]).toMatch("application/json");
       expect(res.status).toBe(404);

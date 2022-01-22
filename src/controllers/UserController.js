@@ -1,6 +1,6 @@
 const { Types } = require("mongoose");
 const { UserModel, OrderModel } = require("../models");
-const { auth } = require("../services/firebase");
+const auth = require("../services/auth");
 
 async function getUsers(req, res, next) {
   const {
@@ -53,10 +53,7 @@ async function getSingleUser(req, res, next) {
       });
     }
 
-    const result = await UserModel.findById(idUser)
-      .select("-createdAt -updatedAt")
-      .lean()
-      .exec();
+    const result = await UserModel.findById(idUser).select("-createdAt -updatedAt").lean().exec();
 
     if (!result) return next();
 
@@ -70,10 +67,18 @@ async function getSingleUser(req, res, next) {
 }
 
 async function createUser(req, res, next) {
-  const { body } = req;
-  const { password, email } = body;
+  const {
+    body: { password, email, ...body },
+  } = req;
 
   try {
+    if (await UserModel.exists({ email })) {
+      return res.status(400).send({
+        success: false,
+        message: "Email account is already used",
+      });
+    }
+
     const { uid } = await auth.createUser({
       email,
       displayName: email,
@@ -81,7 +86,7 @@ async function createUser(req, res, next) {
     });
 
     const { createdAt, updatedAt, ...result } = (
-      await UserModel.create({ uid, ...body })
+      await UserModel.create({ uid, email, ...body })
     ).toJSON();
 
     res.status(201).send({
@@ -155,218 +160,6 @@ async function deleteUser(req, res, next) {
     if (!result) return next();
 
     await auth.deleteUser(result.uid);
-
-    res.status(200).send({
-      success: true,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function getAddresses(req, res, next) {
-  const {
-    params: { idUser },
-  } = req;
-
-  try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong user ID",
-      });
-    }
-
-    const result = await UserModel.findById(idUser)
-      .select(`addresses`)
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    const { addresses } = result;
-
-    res.status(200).send({
-      success: true,
-      data: addresses,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function getSingleAddress(req, res, next) {
-  const {
-    params: { idUser, numAddress },
-  } = req;
-
-  try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong user ID",
-      });
-    }
-
-    if (isNaN(numAddress) || numAddress <= 0) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong address number",
-      });
-    }
-
-    const addressPath = `addresses.${numAddress - 1}`;
-
-    const result = await UserModel.findOne({
-      _id: idUser,
-      [addressPath]: { $exists: true },
-    })
-      .select("addresses")
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result.addresses[numAddress - 1],
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function addAddress(req, res, next) {
-  const {
-    params: { idUser },
-    body,
-  } = req;
-
-  try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong user ID",
-      });
-    }
-
-    const result = await UserModel.findByIdAndUpdate(
-      idUser,
-      {
-        $push: {
-          addresses: body,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-      .select("addresses")
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    res.status(201).send({
-      success: true,
-      data: result.addresses.pop(),
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function updateAddress(req, res, next) {
-  const {
-    params: { idUser, numAddress },
-    body,
-  } = req;
-
-  try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong user ID",
-      });
-    }
-
-    if (isNaN(numAddress) || numAddress <= 0) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong address number",
-      });
-    }
-
-    const addressPath = `addresses.${numAddress - 1}`;
-
-    const result = await UserModel.findOneAndUpdate(
-      { _id: idUser, [addressPath]: { $exists: true } },
-      {
-        $set: {
-          [addressPath]: body,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-      .select("addresses")
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    res.status(200).send({
-      success: true,
-      data: result.addresses[numAddress - 1],
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function deleteAddress(req, res, next) {
-  const { idUser, numAddress } = req.params;
-
-  try {
-    if (!Types.ObjectId.isValid(idUser)) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong user ID",
-      });
-    }
-
-    if (isNaN(numAddress) || numAddress <= 0) {
-      return res.status(400).send({
-        success: false,
-        message: "Wrong address number",
-      });
-    }
-
-    const addressPath = `addresses.${numAddress - 1}`;
-
-    const result = await UserModel.findOne({
-      _id: idUser,
-      [addressPath]: { $exists: true },
-    })
-      .lean()
-      .exec();
-
-    if (!result) return next();
-
-    UserModel.findByIdAndUpdate(idUser, {
-      $unset: {
-        [addressPath]: "",
-      },
-    });
-
-    UserModel.findByIdAndUpdate(idUser, {
-      $pull: {
-        addresses: null,
-      },
-    });
 
     res.status(200).send({
       success: true,
@@ -473,37 +266,49 @@ async function getSingleOrder(req, res, next) {
 }
 
 async function sync(req, res, next) {
-  const { uid, email } = req.user;
+  const { uid } = req.user;
 
   try {
-    const user = await UserModel.findOne({ uid })
-      .select("_id role email firstname lastname")
+    const result = await UserModel.findOne({ uid })
+      .select("role email firstname lastname")
       .lean()
       .exec();
 
-    if (user) {
-      res.status(200).send({
-        success: true,
-        data: user,
-      });
-    } else {
-      const { createdAt, updatedAt, ...data } = (
-        await UserModel.create({ uid, email })
-      ).toJSON();
+    if (!result) throw new Error("User exists in Firebase Auth Service but is not found in DB");
 
-      const newUser = {
-        _id: data._id,
-        role: data.role,
-        email: data.email,
-        firstname: data.firstname,
-        lastname: data.lastname,
-      };
+    res.status(200).send({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
-      res.status(201).send({
-        success: true,
-        data: newUser,
+async function register(req, res, next) {
+  const {
+    body: { password, email, ...body },
+  } = req;
+
+  try {
+    if (await UserModel.exists({ email })) {
+      return res.status(400).send({
+        success: false,
+        message: "Email account is already used",
       });
     }
+
+    const { uid } = await auth.createUser({
+      email,
+      displayName: email,
+      password,
+    });
+
+    await UserModel.create({ uid, email, role: "customer", ...body });
+
+    res.status(201).send({
+      success: true,
+    });
   } catch (error) {
     next(error);
   }
@@ -515,12 +320,8 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
-  getAddresses,
-  getSingleAddress,
-  addAddress,
-  updateAddress,
-  deleteAddress,
   getOrders,
   getSingleOrder,
   sync,
+  register,
 };

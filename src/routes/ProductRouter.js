@@ -45,6 +45,6 @@ ProductsRouter.delete(
   notFoundHandler,
 );
 
-ProductsRouter.use("/", notFoundHandler);
+ProductsRouter.use("*", notFoundHandler);
 
 module.exports = ProductsRouter;
