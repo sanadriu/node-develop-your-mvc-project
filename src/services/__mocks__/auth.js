@@ -6,6 +6,6 @@ module.exports = {
   createUser: () => Promise.resolve({ uid: generateRandomSequence(28, chars) }),
   updateUser: () => Promise.resolve(),
   deleteUser: () => Promise.resolve(),
-  verifyIdToken: () => Promise.resolve({ uid: generateRandomSequence(28, chars) }),
+  verifyIdToken: (authToken) => Promise.resolve({ uid: authToken }),
   getUserByEmail: () => Promise.resolve({ uid: generateRandomSequence(28, chars) }),
 };

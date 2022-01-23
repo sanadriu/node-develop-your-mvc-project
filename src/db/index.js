@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const log = require("../services/logger");
 const { UserModel, ProductModel, OrderModel } = require("../models");
 
 const data = require("../data");
